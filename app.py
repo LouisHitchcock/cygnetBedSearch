@@ -91,20 +91,25 @@ def toggle_favorite(ward_name):
 # Custom CSS for styling
 st.markdown("""
     <style>
-    .ward {
-        font-size: 16px;
-        margin: 4px 0;
-        display: flex;
-        align-items: center;
+    table {
+        width: 100%;
+        border-collapse: collapse;
     }
-    .ward.favorite {
-        color: red;
+    th, td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: center;
+    }
+    th {
+        background-color: #f2f2f2;
     }
     .star {
         cursor: pointer;
         font-size: 20px;
         color: gold;
-        margin-right: 8px;
+    }
+    .favorite {
+        color: red;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -125,31 +130,55 @@ def main():
     st.title("Bed Availability Checker")
 
     st.subheader("Bed Availability")
-    col1, col2 = st.columns(2)
     
-    with col1:
-        st.text("Male Wards")
-        for ward, beds in current_male_wards.items():
-            favorite_class = "favorite" if ward in st.session_state.favorites else ""
-            star = "★" if ward in st.session_state.favorites else "☆"
-            if st.button(star, key=f"star_{ward}", help=f"Toggle favorite for {ward}"):
-                toggle_favorite(ward)
-            st.markdown(
-                f'<div class="ward {favorite_class}"><span class="star">{star}</span>{ward}: {beds} beds</div>',
-                unsafe_allow_html=True,
-            )
+    male_ward_rows = ""
+    for ward, beds in current_male_wards.items():
+        star = "★" if ward in st.session_state.favorites else "☆"
+        favorite_class = "favorite" if ward in st.session_state.favorites else ""
+        male_ward_rows += f"""
+        <tr>
+            <td class="ward-name {favorite_class}">{ward}</td>
+            <td>{beds}</td>
+            <td><span class="star" onclick="window.location.href='?fav_ward={ward}'">{star}</span></td>
+        </tr>
+        """
     
-    with col2:
-        st.text("Female Wards")
-        for ward, beds in current_female_wards.items():
-            favorite_class = "favorite" if ward in st.session_state.favorites else ""
-            star = "★" if ward in st.session_state.favorites else "☆"
-            if st.button(star, key=f"star_{ward}", help=f"Toggle favorite for {ward}"):
-                toggle_favorite(ward)
-            st.markdown(
-                f'<div class="ward {favorite_class}"><span class="star">{star}</span>{ward}: {beds} beds</div>',
-                unsafe_allow_html=True,
-            )
+    female_ward_rows = ""
+    for ward, beds in current_female_wards.items():
+        star = "★" if ward in st.session_state.favorites else "☆"
+        favorite_class = "favorite" if ward in st.session_state.favorites else ""
+        female_ward_rows += f"""
+        <tr>
+            <td class="ward-name {favorite_class}">{ward}</td>
+            <td>{beds}</td>
+            <td><span class="star" onclick="window.location.href='?fav_ward={ward}'">{star}</span></td>
+        </tr>
+        """
+    
+    table_html = f"""
+    <table>
+        <tr>
+            <th>Male Wards</th>
+            <th></th>
+            <th></th>
+            <th>Female Wards</th>
+            <th></th>
+            <th></th>
+        </tr>
+        <tr>
+            <td>*Ward Name*</td>
+            <td>(Number of Beds)</td>
+            <td>☆</td>
+            <td>*Ward Name*</td>
+            <td>(Number of Beds)</td>
+            <td>☆</td>
+        </tr>
+        {male_ward_rows}
+        {female_ward_rows}
+    </table>
+    """
+
+    st.markdown(table_html, unsafe_allow_html=True)
 
     if any(male_differences.values()) or any(female_differences.values()):
         st.subheader("Changes")
@@ -173,4 +202,10 @@ def main():
     save_current_data(data_file, current_male_wards, current_female_wards)
 
 if __name__ == "__main__":
+    # Check for query parameter to toggle favorite
+    fav_ward = st.experimental_get_query_params().get("fav_ward", [None])[0]
+    if fav_ward:
+        toggle_favorite(fav_ward)
+        st.experimental_set_query_params()  # Clear the query params
+
     main()
