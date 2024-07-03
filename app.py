@@ -166,15 +166,25 @@ def main():
             <th></th>
         </tr>
         <tr>
-            <td>*Ward Name*</td>
-            <td>(Number of Beds)</td>
-            <td>☆</td>
-            <td>*Ward Name*</td>
-            <td>(Number of Beds)</td>
-            <td>☆</td>
+            <th>Ward Name</th>
+            <th>Number of Beds</th>
+            <th>Favorite</th>
+            <th>Ward Name</th>
+            <th>Number of Beds</th>
+            <th>Favorite</th>
         </tr>
-        {male_ward_rows}
-        {female_ward_rows}
+        <tr>
+            <td colspan="3">
+                <table>
+                    {male_ward_rows}
+                </table>
+            </td>
+            <td colspan="3">
+                <table>
+                    {female_ward_rows}
+                </table>
+            </td>
+        </tr>
     </table>
     """
 
