@@ -94,10 +94,7 @@ st.markdown("""
     .ward {
         font-size: 16px;
         margin: 4px 0;
-    }
-    .ward a {
-        text-decoration: none;
-        color: inherit;
+        cursor: pointer;
     }
     .ward.favorite {
         color: red;
@@ -127,22 +124,20 @@ def main():
         st.text("Male Wards")
         for ward, beds in current_male_wards.items():
             favorite_class = "favorite" if ward in st.session_state.favorites else ""
-            st.markdown(
+            if st.markdown(
                 f'<div class="ward {favorite_class}" onclick="toggleFavorite(\'{ward}\')">{ward}: {beds} beds</div>',
                 unsafe_allow_html=True,
-            )
-            if st.button(f"Toggle Favorite {ward}", key=f"male_{ward}"):
+            ):
                 toggle_favorite(ward)
     
     with col2:
         st.text("Female Wards")
         for ward, beds in current_female_wards.items():
             favorite_class = "favorite" if ward in st.session_state.favorites else ""
-            st.markdown(
+            if st.markdown(
                 f'<div class="ward {favorite_class}" onclick="toggleFavorite(\'{ward}\')">{ward}: {beds} beds</div>',
                 unsafe_allow_html=True,
-            )
-            if st.button(f"Toggle Favorite {ward}", key=f"female_{ward}"):
+            ):
                 toggle_favorite(ward)
 
     if any(male_differences.values()) or any(female_differences.values()):
