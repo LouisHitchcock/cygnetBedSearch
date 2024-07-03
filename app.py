@@ -76,6 +76,34 @@ def save_favorites(favorites):
     with open(FAVORITES_FILE, 'w') as file:
         json.dump(favorites, file, indent=4)
 
+# Initialize session state for favorites
+if 'favorites' not in st.session_state:
+    st.session_state.favorites = load_favorites()
+
+def toggle_favorite(ward_name):
+    if ward_name in st.session_state.favorites:
+        st.session_state.favorites.remove(ward_name)
+    else:
+        st.session_state.favorites.append(ward_name)
+    save_favorites(st.session_state.favorites)
+
+# Custom CSS for styling
+st.markdown("""
+    <style>
+    .ward {
+        font-size: 16px;
+        margin: 4px 0;
+    }
+    .ward a {
+        text-decoration: none;
+        color: inherit;
+    }
+    .ward.favorite {
+        color: red;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
 def main():
     data_file = 'bed_availability.json'
     
@@ -89,9 +117,6 @@ def main():
     male_differences = compare_data(previous_data.get('male_wards', {}), current_male_wards)
     female_differences = compare_data(previous_data.get('female_wards', {}), current_female_wards)
     
-    # Load favorites
-    favorites = load_favorites()
-    
     st.title("Bed Availability Checker")
 
     st.subheader("Bed Availability")
@@ -100,28 +125,14 @@ def main():
     with col1:
         st.text("Male Wards")
         for ward, beds in current_male_wards.items():
-            if st.button(f"{ward}: {beds} beds", key=ward):
-                if ward in favorites:
-                    favorites.remove(ward)
-                else:
-                    favorites.append(ward)
-                save_favorites(favorites)
-                st.experimental_rerun()
-            if ward in favorites:
-                st.markdown(f"<span style='color:red'>{ward}: {beds} beds</span>", unsafe_allow_html=True)
-
+            favorite_class = "favorite" if ward in st.session_state.favorites else ""
+            st.markdown(f'<div class="ward {favorite_class}"><a href="#" onclick="toggleFavorite(\'{ward}\')">{ward}: {beds} beds</a></div>', unsafe_allow_html=True)
+    
     with col2:
         st.text("Female Wards")
         for ward, beds in current_female_wards.items():
-            if st.button(f"{ward}: {beds} beds", key=ward):
-                if ward in favorites:
-                    favorites.remove(ward)
-                else:
-                    favorites.append(ward)
-                save_favorites(favorites)
-                st.experimental_rerun()
-            if ward in favorites:
-                st.markdown(f"<span style='color:red'>{ward}: {beds} beds</span>", unsafe_allow_html=True)
+            favorite_class = "favorite" if ward in st.session_state.favorites else ""
+            st.markdown(f'<div class="ward {favorite_class}"><a href="#" onclick="toggleFavorite(\'{ward}\')">{ward}: {beds} beds</a></div>', unsafe_allow_html=True)
 
     if any(male_differences.values()) or any(female_differences.values()):
         st.subheader("Changes")
