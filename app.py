@@ -86,6 +86,7 @@ def toggle_favorite(ward_name):
     else:
         st.session_state.favorites.append(ward_name)
     save_favorites(st.session_state.favorites)
+    st.rerun()  # Trigger rerun to update the UI
 
 # Custom CSS for styling
 st.markdown("""
@@ -102,6 +103,14 @@ st.markdown("""
         font-size: 20px;
         color: gold;
         padding-right: 5px;
+        display: inline-block;
+    }
+    .ward-container {
+        display: flex;
+        align-items: center;
+    }
+    .ward-name {
+        flex-grow: 1;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -132,7 +141,7 @@ def main():
             if st.button(star, key=f"star_{ward}", help=f"Toggle favorite for {ward}"):
                 toggle_favorite(ward)
             st.markdown(
-                f'<div class="ward {favorite_class}">{ward}: {beds} beds</div>',
+                f'<div class="ward-container"><span class="star">{star}</span><span class="ward {favorite_class} ward-name">{ward}: {beds} beds</span></div>',
                 unsafe_allow_html=True,
             )
     
@@ -144,7 +153,7 @@ def main():
             if st.button(star, key=f"star_{ward}", help=f"Toggle favorite for {ward}"):
                 toggle_favorite(ward)
             st.markdown(
-                f'<div class="ward {favorite_class}">{ward}: {beds} beds</div>',
+                f'<div class="ward-container"><span class="star">{star}</span><span class="ward {favorite_class} ward-name">{ward}: {beds} beds</span></div>',
                 unsafe_allow_html=True,
             )
 
