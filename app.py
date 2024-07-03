@@ -173,18 +173,8 @@ def main():
             <th>Number of Beds</th>
             <th>Favorite</th>
         </tr>
-        <tr>
-            <td colspan="3">
-                <table>
-                    {male_ward_rows}
-                </table>
-            </td>
-            <td colspan="3">
-                <table>
-                    {female_ward_rows}
-                </table>
-            </td>
-        </tr>
+        {male_ward_rows}
+        {female_ward_rows}
     </table>
     """
 
