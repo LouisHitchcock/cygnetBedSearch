@@ -104,7 +104,27 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
+# JavaScript to handle the toggle
+st.markdown("""
+    <script>
+    function toggleFavorite(ward) {
+        const el = document.querySelector(`.ward a[onclick*="'${ward}'"]`).parentElement;
+        fetch(`?toggle_favorite=${ward}`, {method: 'POST'})
+        .then(() => {
+            el.classList.toggle('favorite');
+        });
+    }
+    </script>
+    """, unsafe_allow_html=True)
+
 def main():
+    # Check if the query parameter is set for toggling favorite
+    query_params = st.experimental_get_query_params()
+    if 'toggle_favorite' in query_params:
+        ward_to_toggle = query_params['toggle_favorite'][0]
+        toggle_favorite(ward_to_toggle)
+        st.experimental_set_query_params()  # Clear the query parameters
+
     data_file = 'bed_availability.json'
     
     # Get current bed availability data
@@ -126,13 +146,13 @@ def main():
         st.text("Male Wards")
         for ward, beds in current_male_wards.items():
             favorite_class = "favorite" if ward in st.session_state.favorites else ""
-            st.markdown(f'<div class="ward {favorite_class}"><a href="#" onclick="toggleFavorite(\'{ward}\')">{ward}: {beds} beds</a></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="ward {favorite_class}"><a href="javascript:toggleFavorite(\'{ward}\')">{ward}: {beds} beds</a></div>', unsafe_allow_html=True)
     
     with col2:
         st.text("Female Wards")
         for ward, beds in current_female_wards.items():
             favorite_class = "favorite" if ward in st.session_state.favorites else ""
-            st.markdown(f'<div class="ward {favorite_class}"><a href="#" onclick="toggleFavorite(\'{ward}\')">{ward}: {beds} beds</a></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="ward {favorite_class}"><a href="javascript:toggleFavorite(\'{ward}\')">{ward}: {beds} beds</a></div>', unsafe_allow_html=True)
 
     if any(male_differences.values()) or any(female_differences.values()):
         st.subheader("Changes")
