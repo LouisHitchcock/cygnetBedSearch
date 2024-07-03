@@ -94,6 +94,8 @@ st.markdown("""
     .ward {
         font-size: 16px;
         margin: 4px 0;
+        display: flex;
+        align-items: center;
     }
     .ward.favorite {
         color: red;
@@ -102,15 +104,7 @@ st.markdown("""
         cursor: pointer;
         font-size: 20px;
         color: gold;
-        padding-right: 5px;
-        display: inline-block;
-    }
-    .ward-container {
-        display: flex;
-        align-items: center;
-    }
-    .ward-name {
-        flex-grow: 1;
+        margin-right: 8px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -141,7 +135,7 @@ def main():
             if st.button(star, key=f"star_{ward}", help=f"Toggle favorite for {ward}"):
                 toggle_favorite(ward)
             st.markdown(
-                f'<div class="ward-container"><span class="star">{star}</span><span class="ward {favorite_class} ward-name">{ward}: {beds} beds</span></div>',
+                f'<div class="ward {favorite_class}"><span class="star">{star}</span>{ward}: {beds} beds</div>',
                 unsafe_allow_html=True,
             )
     
@@ -153,7 +147,7 @@ def main():
             if st.button(star, key=f"star_{ward}", help=f"Toggle favorite for {ward}"):
                 toggle_favorite(ward)
             st.markdown(
-                f'<div class="ward-container"><span class="star">{star}</span><span class="ward {favorite_class} ward-name">{ward}: {beds} beds</span></div>',
+                f'<div class="ward {favorite_class}"><span class="star">{star}</span>{ward}: {beds} beds</div>',
                 unsafe_allow_html=True,
             )
 
