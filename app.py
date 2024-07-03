@@ -86,7 +86,7 @@ def toggle_favorite(ward_name):
     else:
         st.session_state.favorites.append(ward_name)
     save_favorites(st.session_state.favorites)
-    st.experimental_rerun()  # Trigger rerun to update the UI
+    st.rerun()  # Trigger rerun to update the UI
 
 # Custom CSS for styling
 st.markdown("""
@@ -125,7 +125,7 @@ def main():
         for ward, beds in current_male_wards.items():
             favorite_class = "favorite" if ward in st.session_state.favorites else ""
             if st.markdown(
-                f'<div class="ward {favorite_class}" onclick="toggleFavorite(\'{ward}\')">{ward}: {beds} beds</div>',
+                f'<div class="ward {favorite_class}"><a href="?fav_ward={ward}">{ward}: {beds} beds</a></div>',
                 unsafe_allow_html=True,
             ):
                 toggle_favorite(ward)
@@ -135,7 +135,7 @@ def main():
         for ward, beds in current_female_wards.items():
             favorite_class = "favorite" if ward in st.session_state.favorites else ""
             if st.markdown(
-                f'<div class="ward {favorite_class}" onclick="toggleFavorite(\'{ward}\')">{ward}: {beds} beds</div>',
+                f'<div class="ward {favorite_class}"><a href="?fav_ward={ward}">{ward}: {beds} beds</a></div>',
                 unsafe_allow_html=True,
             ):
                 toggle_favorite(ward)
@@ -162,4 +162,10 @@ def main():
     save_current_data(data_file, current_male_wards, current_female_wards)
 
 if __name__ == "__main__":
+    # Check for query parameter to toggle favorite
+    fav_ward = st.experimental_get_query_params().get("fav_ward", [None])[0]
+    if fav_ward:
+        toggle_favorite(fav_ward)
+        st.experimental_set_query_params()  # Clear the query params
+
     main()
