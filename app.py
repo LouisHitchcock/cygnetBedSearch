@@ -86,7 +86,6 @@ def toggle_favorite(ward_name):
     else:
         st.session_state.favorites.append(ward_name)
     save_favorites(st.session_state.favorites)
-    st.rerun()  # Trigger rerun to update the UI
 
 # Custom CSS for styling
 st.markdown("""
@@ -94,7 +93,6 @@ st.markdown("""
     .ward {
         font-size: 16px;
         margin: 4px 0;
-        cursor: pointer;
     }
     .ward.favorite {
         color: red;
@@ -129,20 +127,24 @@ def main():
     with col1:
         st.text("Male Wards")
         for ward, beds in current_male_wards.items():
-            star = "★" if ward in st.session_state.favorites else "☆"
             favorite_class = "favorite" if ward in st.session_state.favorites else ""
+            star = "★" if ward in st.session_state.favorites else "☆"
+            if st.button(star, key=f"star_{ward}", help=f"Toggle favorite for {ward}"):
+                toggle_favorite(ward)
             st.markdown(
-                f'<div class="ward {favorite_class}"><span class="star" onclick="window.location.href=\'?fav_ward={ward}\'">{star}</span>{ward}: {beds} beds</div>',
+                f'<div class="ward {favorite_class}">{ward}: {beds} beds</div>',
                 unsafe_allow_html=True,
             )
     
     with col2:
         st.text("Female Wards")
         for ward, beds in current_female_wards.items():
-            star = "★" if ward in st.session_state.favorites else "☆"
             favorite_class = "favorite" if ward in st.session_state.favorites else ""
+            star = "★" if ward in st.session_state.favorites else "☆"
+            if st.button(star, key=f"star_{ward}", help=f"Toggle favorite for {ward}"):
+                toggle_favorite(ward)
             st.markdown(
-                f'<div class="ward {favorite_class}"><span class="star" onclick="window.location.href=\'?fav_ward={ward}\'">{star}</span>{ward}: {beds} beds</div>',
+                f'<div class="ward {favorite_class}">{ward}: {beds} beds</div>',
                 unsafe_allow_html=True,
             )
 
@@ -168,10 +170,4 @@ def main():
     save_current_data(data_file, current_male_wards, current_female_wards)
 
 if __name__ == "__main__":
-    # Check for query parameter to toggle favorite
-    fav_ward = st.experimental_get_query_params().get("fav_ward", [None])[0]
-    if fav_ward:
-        toggle_favorite(fav_ward)
-        st.experimental_set_query_params()  # Clear the query params
-
     main()
