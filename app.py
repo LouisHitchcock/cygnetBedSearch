@@ -2,8 +2,9 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import os
-import streamlit as st
+import tkinter as tk
 
+# Define the path for saving favorites
 FAVORITES_FILE = 'favorites.json'
 
 def get_bed_availability():
@@ -39,11 +40,11 @@ def get_bed_availability():
 
         return male_wards, female_wards
     else:
-        st.error(f"Failed to retrieve data: {response.status_code}")
+        print(f"Failed to retrieve data: {response.status_code}")
         return {}, {}
 
 def load_previous_data(file_path):
-    if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
+    if os.path.exists(file_path):
         with open(file_path, 'r') as file:
             return json.load(file)
     return {}
@@ -67,7 +68,7 @@ def compare_data(old_data, new_data):
     return differences
 
 def load_favorites():
-    if os.path.exists(FAVORITES_FILE) and os.path.getsize(FAVORITES_FILE) > 0:
+    if os.path.exists(FAVORITES_FILE):
         with open(FAVORITES_FILE, 'r') as file:
             return json.load(file)
     return []
@@ -76,43 +77,65 @@ def save_favorites(favorites):
     with open(FAVORITES_FILE, 'w') as file:
         json.dump(favorites, file, indent=4)
 
-# Initialize session state for favorites
-if 'favorites' not in st.session_state:
-    st.session_state.favorites = load_favorites()
-
-def toggle_favorite(ward_name):
-    if ward_name in st.session_state.favorites:
-        st.session_state.favorites.remove(ward_name)
+def toggle_favorite(label, ward_name, favorites):
+    if ward_name in favorites:
+        favorites.remove(ward_name)
+        label.config(fg="black")
     else:
-        st.session_state.favorites.append(ward_name)
-    save_favorites(st.session_state.favorites)
-    st.rerun()  # Trigger rerun to update the UI
+        favorites.append(ward_name)
+        label.config(fg="red")
+    save_favorites(favorites)
 
-# Custom CSS for styling
-st.markdown("""
-    <style>
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    th, td {
-        border: 1px solid black;
-        padding: 8px;
-        text-align: center;
-    }
-    th {
-        background-color: #f2f2f2;
-    }
-    .star {
-        cursor: pointer;
-        font-size: 20px;
-        color: gold;
-    }
-    .favorite {
-        color: red;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+def update_ui(current_male_wards, current_female_wards, male_differences, female_differences, favorites):
+    for widget in root.winfo_children():
+        widget.destroy()
+
+    tk.Label(root, text="Bed Availability", font=("Arial", 12, "bold")).grid(row=0, columnspan=4, pady=10)
+
+    tk.Label(root, text="Male Wards", font=("Arial", 10, "bold")).grid(row=1, column=0, padx=10)
+    tk.Label(root, text="Female Wards", font=("Arial", 10, "bold")).grid(row=1, column=2, padx=10)
+
+    male_row = 2
+    for ward, beds in current_male_wards.items():
+        label = tk.Label(root, text=f"{ward}: {beds} beds", fg="red" if ward in favorites else "black")
+        label.grid(row=male_row, column=0, padx=10, sticky='w')
+        label.bind("<Button-1>", lambda e, lbl=label, wn=ward: toggle_favorite(lbl, wn, favorites))
+        male_row += 1
+
+    female_row = 2
+    for ward, beds in current_female_wards.items():
+        label = tk.Label(root, text=f"{ward}: {beds} beds", fg="red" if ward in favorites else "black")
+        label.grid(row=female_row, column=2, padx=10, sticky='w')
+        label.bind("<Button-1>", lambda e, lbl=label, wn=ward: toggle_favorite(lbl, wn, favorites))
+        female_row += 1
+
+    if any(male_differences.values()) or any(female_differences.values()):
+        tk.Label(root, text="Changes", font=("Arial", 12, "bold")).grid(row=max(male_row, female_row), columnspan=4, pady=10)
+        changes_row = max(male_row, female_row) + 1
+        tk.Label(root, text="Male Wards", font=("Arial", 10, "bold")).grid(row=changes_row, column=0, padx=10)
+        tk.Label(root, text="Female Wards", font=("Arial", 10, "bold")).grid(row=changes_row, column=2, padx=10)
+        changes_row += 1
+        
+        for ward, beds in male_differences["added"].items():
+            tk.Label(root, text=f"Added: {ward}: {beds} beds").grid(row=changes_row, column=0, padx=10, sticky='w')
+            changes_row += 1
+        for ward, beds in male_differences["removed"].items():
+            tk.Label(root, text=f"Removed: {ward}: {beds} beds").grid(row=changes_row, column=0, padx=10, sticky='w')
+            changes_row += 1
+        for ward, change in male_differences["updated"].items():
+            tk.Label(root, text=f"Updated: {ward}: {change['old']} -> {change['new']} beds").grid(row=changes_row, column=0, padx=10, sticky='w')
+            changes_row += 1
+
+        changes_row = max(male_row, female_row) + 1
+        for ward, beds in female_differences["added"].items():
+            tk.Label(root, text=f"Added: {ward}: {beds} beds").grid(row=changes_row, column=2, padx=10, sticky='w')
+            changes_row += 1
+        for ward, beds in female_differences["removed"].items():
+            tk.Label(root, text=f"Removed: {ward}: {beds} beds").grid(row=changes_row, column=2, padx=10, sticky='w')
+            changes_row += 1
+        for ward, change in female_differences["updated"].items():
+            tk.Label(root, text=f"Updated: {ward}: {change['old']} -> {change['new']} beds").grid(row=changes_row, column=2, padx=10, sticky='w')
+            changes_row += 1
 
 def main():
     data_file = 'bed_availability.json'
@@ -127,85 +150,18 @@ def main():
     male_differences = compare_data(previous_data.get('male_wards', {}), current_male_wards)
     female_differences = compare_data(previous_data.get('female_wards', {}), current_female_wards)
     
-    st.title("Bed Availability Checker")
-
-    st.subheader("Bed Availability")
+    # Load favorites
+    favorites = load_favorites()
     
-    male_ward_rows = ""
-    for ward, beds in current_male_wards.items():
-        star = "★" if ward in st.session_state.favorites else "☆"
-        favorite_class = "favorite" if ward in st.session_state.favorites else ""
-        male_ward_rows += f"""
-        <tr>
-            <td class="ward-name {favorite_class}">{ward}</td>
-            <td>{beds}</td>
-            <td><span class="star" onclick="window.location.href='?fav_ward={ward}'">{star}</span></td>
-        </tr>
-        """
+    # Update the UI with the current data and differences
+    update_ui(current_male_wards, current_female_wards, male_differences, female_differences, favorites)
     
-    female_ward_rows = ""
-    for ward, beds in current_female_wards.items():
-        star = "★" if ward in st.session_state.favorites else "☆"
-        favorite_class = "favorite" if ward in st.session_state.favorites else ""
-        female_ward_rows += f"""
-        <tr>
-            <td class="ward-name {favorite_class}">{ward}</td>
-            <td>{beds}</td>
-            <td><span class="star" onclick="window.location.href='?fav_ward={ward}'">{star}</span></td>
-        </tr>
-        """
-    
-    table_html = f"""
-    <table>
-        <tr>
-            <th>Male Wards</th>
-            <th></th>
-            <th></th>
-            <th>Female Wards</th>
-            <th></th>
-            <th></th>
-        </tr>
-        <tr>
-            <th>Ward Name</th>
-            <th>Number of Beds</th>
-            <th>Favorite</th>
-            <th>Ward Name</th>
-            <th>Number of Beds</th>
-            <th>Favorite</th>
-        </tr>
-        {male_ward_rows}
-        {female_ward_rows}
-    </table>
-    """
-
-    st.markdown(table_html, unsafe_allow_html=True)
-
-    if any(male_differences.values()) or any(female_differences.values()):
-        st.subheader("Changes")
-        st.text("Male Wards")
-        for ward, beds in male_differences["added"].items():
-            st.text(f"Added: {ward}: {beds} beds")
-        for ward, beds in male_differences["removed"].items():
-            st.text(f"Removed: {ward}: {beds} beds")
-        for ward, change in male_differences["updated"].items():
-            st.text(f"Updated: {ward}: {change['old']} -> {change['new']} beds")
-
-        st.text("Female Wards")
-        for ward, beds in female_differences["added"].items():
-            st.text(f"Added: {ward}: {beds} beds")
-        for ward, beds in female_differences["removed"].items():
-            st.text(f"Removed: {ward}: {beds} beds")
-        for ward, change in female_differences["updated"].items():
-            st.text(f"Updated: {ward}: {change['old']} -> {change['new']} beds")
-
     # Save current data
     save_current_data(data_file, current_male_wards, current_female_wards)
 
 if __name__ == "__main__":
-    # Check for query parameter to toggle favorite
-    fav_ward = st.experimental_get_query_params().get("fav_ward", [None])[0]
-    if fav_ward:
-        toggle_favorite(fav_ward)
-        st.experimental_set_query_params()  # Clear the query params
-
+    root = tk.Tk()
+    root.title("Bed Availability Checker")
+    root.geometry("600x600")
     main()
+    root.mainloop()
