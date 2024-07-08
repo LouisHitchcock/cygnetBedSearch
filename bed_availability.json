@@ -1,26 +1,181 @@
 {
     "male_wards": {
-        "Cygnet Storthfield House": 4,
-        "Cygnet Hospital Derby": 4,
-        "Cygnet Hospital Kewstoke": 4,
-        "Cygnet St Augustine\u2019s": 4,
-        "Cygnet Delfryn House": 4,
-        "Cygnet Hospital Colchester": 3,
-        "Cygnet Fountains": 3,
-        "Cygnet Oaks": 2,
-        "Gledholt Mews and Coach House": 2,
-        "Cygnet Hospital Maidstone": 2,
-        "1 Vincent Court": 2,
-        "15 The Sycamores": 2,
-        "12 Woodcross Street": 1,
-        "20A and 20B Turls Hill Road": 1,
-        "Cygnet Lodge Woking": 1
+        "Cygnet Storthfield House": {
+            "beds": 4,
+            "purpose": "Cygnet Storthfield House",
+            "hospital": "Unknown Hospital"
+        },
+        "Cygnet Hospital Derby": {
+            "beds": 4,
+            "purpose": "Cygnet Hospital Derby",
+            "hospital": "Unknown Hospital"
+        },
+        "Cygnet Hospital Kewstoke": {
+            "beds": 2,
+            "purpose": "Cygnet Hospital Kewstoke",
+            "hospital": "Unknown Hospital"
+        },
+        "Cygnet St Augustine\u2019s": {
+            "beds": 4,
+            "purpose": "Cygnet St Augustine\u2019s",
+            "hospital": "Unknown Hospital"
+        },
+        "Cygnet Delfryn House": {
+            "beds": 4,
+            "purpose": "Cygnet Delfryn House",
+            "hospital": "Unknown Hospital"
+        },
+        "Cygnet Hospital Colchester": {
+            "beds": 3,
+            "purpose": "Cygnet Hospital Colchester",
+            "hospital": "Unknown Hospital"
+        },
+        "Cygnet Fountains": {
+            "beds": 3,
+            "purpose": "Cygnet Fountains",
+            "hospital": "Unknown Hospital"
+        },
+        "Cygnet Oaks": {
+            "beds": 2,
+            "purpose": "Cygnet Oaks",
+            "hospital": "Unknown Hospital"
+        },
+        "Gledholt Mews and Coach House": {
+            "beds": 2,
+            "purpose": "Gledholt Mews and Coach House",
+            "hospital": "Unknown Hospital"
+        },
+        "Cygnet Hospital Maidstone": {
+            "beds": 2,
+            "purpose": "Cygnet Hospital Maidstone",
+            "hospital": "Unknown Hospital"
+        },
+        "1 Vincent Court": {
+            "beds": 2,
+            "purpose": "1 Vincent Court",
+            "hospital": "Unknown Hospital"
+        },
+        "15 The Sycamores": {
+            "beds": 2,
+            "purpose": "15 The Sycamores",
+            "hospital": "Unknown Hospital"
+        },
+        "12 Woodcross Street": {
+            "beds": 1,
+            "purpose": "12 Woodcross Street",
+            "hospital": "Unknown Hospital"
+        },
+        "20A and 20B Turls Hill Road": {
+            "beds": 1,
+            "purpose": "20A and 20B Turls Hill Road",
+            "hospital": "Unknown Hospital"
+        },
+        "Cygnet Lodge Woking": {
+            "beds": 1,
+            "purpose": "Cygnet Lodge Woking",
+            "hospital": "Unknown Hospital"
+        },
+        "Cygnet Hospital Clifton": {
+            "beds": 1,
+            "purpose": "Cygnet Hospital Clifton",
+            "hospital": "Unknown Hospital"
+        },
+        "Cygnet Hospital Bury": {
+            "beds": 2,
+            "purpose": "Cygnet Hospital Bury",
+            "hospital": "Unknown Hospital"
+        },
+        "Cygnet Hospital Wyke": {
+            "beds": 2,
+            "purpose": "Cygnet Hospital Wyke",
+            "hospital": "Unknown Hospital"
+        },
+        "Cygnet Hospital Sherwood": {
+            "beds": 1,
+            "purpose": "Cygnet Hospital Sherwood",
+            "hospital": "Unknown Hospital"
+        },
+        "Cygnet Hospital Stevenage": {
+            "beds": 1,
+            "purpose": "Cygnet Hospital Stevenage",
+            "hospital": "Unknown Hospital"
+        }
     },
     "female_wards": {
-        "Cygnet Lodge Kenton": 3,
-        "Cygnet Aspen House": 3,
-        "Ty Alarch": 2,
-        "Cygnet St Teilo House": 2,
-        "Cygnet Delfryn Lodge": 2
+        "Cygnet Lodge Kenton": {
+            "beds": 3,
+            "purpose": "Cygnet Lodge Kenton",
+            "hospital": "Unknown Hospital"
+        },
+        "Cygnet Aspen House": {
+            "beds": 3,
+            "purpose": "Cygnet Aspen House",
+            "hospital": "Unknown Hospital"
+        },
+        "Ty Alarch": {
+            "beds": 2,
+            "purpose": "Ty Alarch",
+            "hospital": "Unknown Hospital"
+        },
+        "Cygnet St Teilo House": {
+            "beds": 2,
+            "purpose": "Cygnet St Teilo House",
+            "hospital": "Unknown Hospital"
+        },
+        "Cygnet Delfryn Lodge": {
+            "beds": 2,
+            "purpose": "Cygnet Delfryn Lodge",
+            "hospital": "Unknown Hospital"
+        },
+        "Cygnet Hospital Beckton": {
+            "beds": 3,
+            "purpose": "Cygnet Hospital Beckton",
+            "hospital": "Unknown Hospital"
+        },
+        "Cygnet Maple House": {
+            "beds": 4,
+            "purpose": "Cygnet Maple House",
+            "hospital": "Unknown Hospital"
+        },
+        "Cygnet Hospital Maidstone": {
+            "beds": 2,
+            "purpose": "Cygnet Hospital Maidstone",
+            "hospital": "Unknown Hospital"
+        },
+        "Cygnet Acer Clinic": {
+            "beds": 1,
+            "purpose": "Cygnet Acer Clinic",
+            "hospital": "Unknown Hospital"
+        },
+        "Cygnet Appletree": {
+            "beds": 2,
+            "purpose": "Cygnet Appletree",
+            "hospital": "Unknown Hospital"
+        },
+        "Cygnet Hospital Godden Green": {
+            "beds": 2,
+            "purpose": "Cygnet Hospital Godden Green",
+            "hospital": "Unknown Hospital"
+        },
+        "Cygnet Hospital Kewstoke": {
+            "beds": 3,
+            "purpose": "Cygnet Hospital Kewstoke",
+            "hospital": "Unknown Hospital"
+        },
+        "Cygnet Hospital Taunton": {
+            "beds": 3,
+            "purpose": "Cygnet Hospital Taunton",
+            "hospital": "Unknown Hospital"
+        },
+        "Cygnet Hospital Stevenage": {
+            "beds": 2,
+            "purpose": "Cygnet Hospital Stevenage",
+            "hospital": "Unknown Hospital"
+        },
+        "Cygnet Hospital Hexham": {
+            "beds": 1,
+            "purpose": "Cygnet Hospital Hexham",
+            "hospital": "Unknown Hospital"
+        }
     }
 }
