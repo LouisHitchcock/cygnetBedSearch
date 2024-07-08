@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bed Availability</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .ward {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bed Availability</h1>
+    <h2>Male Wards</h2>
+    <div id="male-wards"></div>
+    <h2>Female Wards</h2>
+    <div id="female-wards"></div>
+
+    <script>
+        async function fetchData() {
+            const response = await fetch('data.json');
+            const data = await response.json();
+            const maleWardsContainer = document.getElementById('male-wards');
+            const femaleWardsContainer = document.getElementById('female-wards');
+
+            maleWardsContainer.innerHTML = '';
+            femaleWardsContainer.innerHTML = '';
+
+            for (const [ward, info] of Object.entries(data.male_wards)) {
+                maleWardsContainer.innerHTML += `<div class="ward">${ward}, ${info.purpose}, ${info.beds} Beds</div>`;
+            }
+
+            for (const [ward, info] of Object.entries(data.female_wards)) {
+                femaleWardsContainer.innerHTML += `<div class="ward">${ward}, ${info.purpose}, ${info.beds} Beds</div>`;
+            }
+        }
+
+        fetchData();
+    </script>
+</body>
+</html>
