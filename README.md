@@ -1,1 +1,3 @@
-A Small python script that Scrapes the data from Cygnet Psychatric Hosptials, It collects the Bed data and using TKinter displays a UI that highlights any changes
+Python backend for scraping Cygnet Bed Data and comparing results every six hours:
+
+Viewable on: https://louishitchcock.github.io/cygnetBedSearch/
