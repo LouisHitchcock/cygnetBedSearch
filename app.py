@@ -7,11 +7,11 @@ import tkinter as tk
 # Define the path for saving favorites
 FAVORITES_FILE = 'favorites.json'
 
-# List of URLs to scrape
+# List of URLs to scrape along with their respective purposes
 URLS = [
-    "https://www.cygnetgroup.com/professionals/bed-placement-search/?select-service=health-care-services&service=84&social_care_service=&gender=all",
-    "https://www.cygnetgroup.com/professionals/bed-placement-search/?select-service=&service=87&social_care_service=&gender=all",
-    "https://www.cygnetgroup.com/professionals/bed-placement-search/?select-service=&service=81&social_care_service=&gender=all"
+    ("https://www.cygnetgroup.com/professionals/bed-placement-search/?select-service=health-care-services&service=84&social_care_service=&gender=all", "Rehab"),
+    ("https://www.cygnetgroup.com/professionals/bed-placement-search/?select-service=&service=87&social_care_service=&gender=all", "PDU"),
+    ("https://www.cygnetgroup.com/professionals/bed-placement-search/?select-service=&service=81&social_care_service=&gender=all", "Acute/PICU")
 ]
 
 def get_bed_availability():
@@ -22,7 +22,7 @@ def get_bed_availability():
     male_wards = {}
     female_wards = {}
     
-    for url in URLS:
+    for url, purpose in URLS:
         response = requests.get(url, headers=headers)
         
         if response.status_code == 200:
@@ -32,22 +32,17 @@ def get_bed_availability():
             
             for result in bed_results:
                 ward_name_element = result.find('h1', class_='result__heading')
-                hospital_name_element = result.find('p', class_='result__subtitle')
                 bed_count_element = result.find('div', class_='result__quantity-heading')
                 gender_element = result.find('span', class_='result__icons')
-                purpose_element = result.find('div', class_='result__content')
 
-                if ward_name_element and bed_count_element and purpose_element:
+                if ward_name_element and bed_count_element:
                     ward_name = ward_name_element.text.strip()
-                    hospital_name = hospital_name_element.text.strip() if hospital_name_element else "Unknown Hospital"
                     bed_count = int(bed_count_element.text.strip().split()[0])
-                    purpose = purpose_element.text.strip().split("\n")[0]
 
                     if bed_count > 0:
                         ward_info = {
                             'beds': bed_count,
-                            'purpose': purpose,
-                            'hospital': hospital_name
+                            'purpose': purpose
                         }
                         if gender_element:
                             gender_classes = gender_element.find_all('span')
@@ -114,14 +109,14 @@ def update_ui(current_male_wards, current_female_wards, male_differences, female
 
     male_row = 2
     for ward, info in current_male_wards.items():
-        label = tk.Label(root, text=f"{ward}, {info['hospital']}, {info['purpose']}, {info['beds']} Beds", fg="red" if ward in favorites else "black")
+        label = tk.Label(root, text=f"{ward}, {info['purpose']}, {info['beds']} Beds", fg="red" if ward in favorites else "black")
         label.grid(row=male_row, column=0, padx=10, sticky='w')
         label.bind("<Button-1>", lambda e, lbl=label, wn=ward: toggle_favorite(lbl, wn, favorites))
         male_row += 1
 
     female_row = 2
     for ward, info in current_female_wards.items():
-        label = tk.Label(root, text=f"{ward}, {info['hospital']}, {info['purpose']}, {info['beds']} Beds", fg="red" if ward in favorites else "black")
+        label = tk.Label(root, text=f"{ward}, {info['purpose']}, {info['beds']} Beds", fg="red" if ward in favorites else "black")
         label.grid(row=female_row, column=2, padx=10, sticky='w')
         label.bind("<Button-1>", lambda e, lbl=label, wn=ward: toggle_favorite(lbl, wn, favorites))
         female_row += 1
@@ -134,24 +129,24 @@ def update_ui(current_male_wards, current_female_wards, male_differences, female
         changes_row += 1
         
         for ward, info in male_differences["added"].items():
-            tk.Label(root, text=f"Added: {ward}, {info['hospital']}, {info['purpose']}, {info['beds']} Beds").grid(row=changes_row, column=0, padx=10, sticky='w')
+            tk.Label(root, text=f"Added: {ward}, {info['purpose']}, {info['beds']} Beds").grid(row=changes_row, column=0, padx=10, sticky='w')
             changes_row += 1
         for ward, info in male_differences["removed"].items():
-            tk.Label(root, text=f"Removed: {ward}, {info['hospital']}, {info['purpose']}, {info['beds']} Beds").grid(row=changes_row, column=0, padx=10, sticky='w')
+            tk.Label(root, text=f"Removed: {ward}, {info['purpose']}, {info['beds']} Beds").grid(row=changes_row, column=0, padx=10, sticky='w')
             changes_row += 1
         for ward, change in male_differences["updated"].items():
-            tk.Label(root, text=f"Updated: {ward}, {change['old']['hospital']}, {change['new']['purpose']}, {change['old']['beds']} Beds -> {change['new']['beds']} Beds").grid(row=changes_row, column=0, padx=10, sticky='w')
+            tk.Label(root, text=f"Updated: {ward}, {change['new']['purpose']}, {change['old']['beds']} Beds -> {change['new']['beds']} Beds").grid(row=changes_row, column=0, padx=10, sticky='w')
             changes_row += 1
 
         changes_row = max(male_row, female_row) + 1
         for ward, info in female_differences["added"].items():
-            tk.Label(root, text=f"Added: {ward}, {info['hospital']}, {info['purpose']}, {info['beds']} Beds").grid(row=changes_row, column=2, padx=10, sticky='w')
+            tk.Label(root, text=f"Added: {ward}, {info['purpose']}, {info['beds']} Beds").grid(row=changes_row, column=2, padx=10, sticky='w')
             changes_row += 1
         for ward, info in female_differences["removed"].items():
-            tk.Label(root, text=f"Removed: {ward}, {info['hospital']}, {info['purpose']}, {info['beds']} Beds").grid(row=changes_row, column=2, padx=10, sticky='w')
+            tk.Label(root, text=f"Removed: {ward}, {info['purpose']}, {info['beds']} Beds").grid(row=changes_row, column=2, padx=10, sticky='w')
             changes_row += 1
         for ward, change in female_differences["updated"].items():
-            tk.Label(root, text=f"Updated: {ward}, {change['old']['hospital']}, {change['new']['purpose']}, {change['old']['beds']} Beds -> {change['new']['beds']} Beds").grid(row=changes_row, column=2, padx=10, sticky='w')
+            tk.Label(root, text=f"Updated: {ward}, {change['new']['purpose']}, {change['old']['beds']} Beds -> {change['new']['beds']} Beds").grid(row=changes_row, column=2, padx=10, sticky='w')
             changes_row += 1
 
 def main():
