@@ -5,19 +5,44 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
         }
-        .ward {
-            margin: 10px 0;
+        .container {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+        }
+        .ward-container {
+            width: 45%;
+            border: 1px solid #000;
+            padding: 10px;
+        }
+        .chart-container {
+            width: 90%;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <h1>Bed Availability</h1>
-    <h2>Male Wards</h2>
-    <div id="male-wards"></div>
-    <h2>Female Wards</h2>
-    <div id="female-wards"></div>
+    <h1>Cygnet Bed Availability</h1>
+    <div class="container">
+        <div class="ward-container">
+            <h2>Male Beds</h2>
+            <div id="male-wards"></div>
+        </div>
+        <div class="ward-container">
+            <h2>Female Beds</h2>
+            <div id="female-wards"></div>
+        </div>
+    </div>
+    <div class="chart-container">
+        <canvas id="bedChangesChart"></canvas>
+    </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         async function fetchData() {
             const response = await fetch('data.json');
@@ -38,6 +63,54 @@
         }
 
         fetchData();
+
+        const ctx = document.getElementById('bedChangesChart').getContext('2d');
+        const bedChangesChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [], // Date labels
+                datasets: [{
+                    label: 'Number of Changes',
+                    data: [], // Number of changes data
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'hour'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Number of Changes'
+                        }
+                    }
+                }
+            }
+        });
+
+        // This function is a placeholder for updating the chart with real data
+        function updateChart() {
+            // Fetch or compute data here
+            const dates = []; // Fill with date labels
+            const changes = []; // Fill with number of changes
+
+            bedChangesChart.data.labels = dates;
+            bedChangesChart.data.datasets[0].data = changes;
+            bedChangesChart.update();
+        }
+
+        updateChart();
     </script>
 </body>
 </html>
