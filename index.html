@@ -64,6 +64,10 @@
 
         async function fetchChangeLog() {
             const response = await fetch('change_log.json');
+            if (!response.ok) {
+                console.error('Failed to load change log');
+                return;
+            }
             const changeLog = await response.json();
 
             const dates = changeLog.map(entry => entry.timestamp);
@@ -105,8 +109,10 @@
             });
         }
 
-        fetchData();
-        fetchChangeLog();
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchData();
+            fetchChangeLog();
+        });
     </script>
 </body>
 </html>
