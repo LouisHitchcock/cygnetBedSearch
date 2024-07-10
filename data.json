@@ -22,7 +22,7 @@
         },
         "Cygnet Hospital Colchester": {
             "beds": 3,
-            "purpose": "Acute/PICU"
+            "purpose": "Rehab"
         },
         "Cygnet Fountains": {
             "beds": 3,
@@ -79,10 +79,6 @@
         "Cygnet Hospital Sherwood": {
             "beds": 1,
             "purpose": "Acute/PICU"
-        },
-        "Cygnet Hospital Taunton": {
-            "beds": 1,
-            "purpose": "Acute/PICU"
         }
     },
     "female_wards": {
@@ -123,7 +119,7 @@
             "purpose": "PDU"
         },
         "Cygnet Appletree": {
-            "beds": 3,
+            "beds": 1,
             "purpose": "Acute/PICU"
         },
         "Cygnet Hospital Godden Green": {
@@ -139,6 +135,10 @@
             "purpose": "Acute/PICU"
         },
         "Cygnet Hospital Stevenage": {
+            "beds": 1,
+            "purpose": "Acute/PICU"
+        },
+        "Cygnet Hospital Taunton": {
             "beds": 2,
             "purpose": "Acute/PICU"
         },
