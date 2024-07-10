@@ -62,55 +62,51 @@
             }
         }
 
-        fetchData();
+        async function fetchChangeLog() {
+            const response = await fetch('change_log.json');
+            const changeLog = await response.json();
 
-        const ctx = document.getElementById('bedChangesChart').getContext('2d');
-        const bedChangesChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: [], // Date labels
-                datasets: [{
-                    label: 'Number of Changes',
-                    data: [], // Number of changes data
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    x: {
-                        type: 'time',
-                        time: {
-                            unit: 'hour'
+            const dates = changeLog.map(entry => entry.timestamp);
+            const changes = changeLog.map(entry => entry.changes);
+
+            const ctx = document.getElementById('bedChangesChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'Total Changes',
+                        data: changes,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'day'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
                         },
-                        title: {
-                            display: true,
-                            text: 'Date'
-                        }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Number of Changes'
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Total Changes'
+                            }
                         }
                     }
                 }
-            }
-        });
-
-        // This function is a placeholder for updating the chart with real data
-        function updateChart() {
-            // Fetch or compute data here
-            const dates = []; // Fill with date labels
-            const changes = []; // Fill with number of changes
-
-            bedChangesChart.data.labels = dates;
-            bedChangesChart.data.datasets[0].data = changes;
-            bedChangesChart.update();
+            });
         }
 
-        updateChart();
+        fetchData();
+        fetchChangeLog();
     </script>
 </body>
 </html>

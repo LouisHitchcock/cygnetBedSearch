@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import json
+from datetime import datetime
 
 def get_bed_availability():
     headers = {
@@ -56,9 +57,22 @@ def save_data(male_wards, female_wards):
     with open('data.json', 'w') as f:
         json.dump(data, f, indent=4)
 
+def log_changes(male_wards, female_wards):
+    with open('change_log.json', 'r') as f:
+        change_log = json.load(f)
+    
+    total_changes = len(male_wards) + len(female_wards)
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    
+    change_log.append({'timestamp': timestamp, 'changes': total_changes})
+    
+    with open('change_log.json', 'w') as f:
+        json.dump(change_log, f, indent=4)
+
 def main():
     male_wards, female_wards = get_bed_availability()
     save_data(male_wards, female_wards)
+    log_changes(male_wards, female_wards)
 
 if __name__ == "__main__":
     main()
