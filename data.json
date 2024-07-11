@@ -9,7 +9,7 @@
             "purpose": "Rehab"
         },
         "Cygnet Hospital Kewstoke": {
-            "beds": 2,
+            "beds": 1,
             "purpose": "Acute/PICU"
         },
         "Cygnet St Augustine\u2019s": {
@@ -21,8 +21,8 @@
             "purpose": "Rehab"
         },
         "Cygnet Hospital Colchester": {
-            "beds": 3,
-            "purpose": "Rehab"
+            "beds": 1,
+            "purpose": "Acute/PICU"
         },
         "Cygnet Fountains": {
             "beds": 3,
@@ -69,11 +69,11 @@
             "purpose": "Acute/PICU"
         },
         "Cygnet Victoria House": {
-            "beds": 2,
+            "beds": 3,
             "purpose": "Acute/PICU"
         },
         "Cygnet Hospital Wyke": {
-            "beds": 2,
+            "beds": 3,
             "purpose": "Acute/PICU"
         },
         "Cygnet Hospital Sherwood": {
@@ -122,8 +122,16 @@
             "beds": 1,
             "purpose": "Acute/PICU"
         },
+        "Cygnet Hospital Stevenage": {
+            "beds": 1,
+            "purpose": "Acute/PICU"
+        },
         "Cygnet Hospital Godden Green": {
             "beds": 1,
+            "purpose": "Acute/PICU"
+        },
+        "Cygnet Hospital Taunton": {
+            "beds": 3,
             "purpose": "Acute/PICU"
         },
         "Cygnet Hospital Hexham": {
@@ -131,14 +139,6 @@
             "purpose": "Acute/PICU"
         },
         "Cygnet Hospital Kewstoke": {
-            "beds": 2,
-            "purpose": "Acute/PICU"
-        },
-        "Cygnet Hospital Stevenage": {
-            "beds": 1,
-            "purpose": "Acute/PICU"
-        },
-        "Cygnet Hospital Taunton": {
             "beds": 2,
             "purpose": "Acute/PICU"
         },
