@@ -21,8 +21,8 @@
             "purpose": "Rehab"
         },
         "Cygnet Hospital Colchester": {
-            "beds": 1,
-            "purpose": "Acute/PICU"
+            "beds": 3,
+            "purpose": "Rehab"
         },
         "Cygnet Fountains": {
             "beds": 3,
@@ -68,15 +68,19 @@
             "beds": 2,
             "purpose": "Acute/PICU"
         },
-        "Cygnet Victoria House": {
-            "beds": 3,
-            "purpose": "Acute/PICU"
-        },
         "Cygnet Hospital Wyke": {
             "beds": 3,
             "purpose": "Acute/PICU"
         },
+        "Cygnet Victoria House": {
+            "beds": 2,
+            "purpose": "Acute/PICU"
+        },
         "Cygnet Hospital Sherwood": {
+            "beds": 1,
+            "purpose": "Acute/PICU"
+        },
+        "Cygnet Hospital Blackheath": {
             "beds": 1,
             "purpose": "Acute/PICU"
         }
