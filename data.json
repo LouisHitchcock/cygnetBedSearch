@@ -68,10 +68,6 @@
             "beds": 1,
             "purpose": "PDU"
         },
-        "Cygnet Hospital Wyke": {
-            "beds": 3,
-            "purpose": "Acute/PICU"
-        },
         "Cygnet Hospital Sherwood": {
             "beds": 2,
             "purpose": "Acute/PICU"
@@ -80,11 +76,11 @@
             "beds": 2,
             "purpose": "Acute/PICU"
         },
-        "Cygnet Hospital Stevenage": {
-            "beds": 1,
+        "Cygnet Hospital Wyke": {
+            "beds": 2,
             "purpose": "Acute/PICU"
         },
-        "Cygnet Hospital Blackheath": {
+        "Cygnet Hospital Stevenage": {
             "beds": 1,
             "purpose": "Acute/PICU"
         }
@@ -127,15 +123,11 @@
             "purpose": "PDU"
         },
         "Cygnet Appletree": {
-            "beds": 1,
+            "beds": 2,
             "purpose": "Acute/PICU"
         },
         "Cygnet Hospital Godden Green": {
             "beds": 2,
-            "purpose": "Acute/PICU"
-        },
-        "Cygnet Hospital Taunton": {
-            "beds": 3,
             "purpose": "Acute/PICU"
         },
         "Cygnet Hospital Woking": {
@@ -151,6 +143,10 @@
             "purpose": "Acute/PICU"
         },
         "Cygnet Hospital Stevenage": {
+            "beds": 2,
+            "purpose": "Acute/PICU"
+        },
+        "Cygnet Hospital Taunton": {
             "beds": 2,
             "purpose": "Acute/PICU"
         }
