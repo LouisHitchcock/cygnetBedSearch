@@ -60,23 +60,27 @@
             "beds": 1,
             "purpose": "Rehab"
         },
+        "Cygnet Hospital Bury": {
+            "beds": 1,
+            "purpose": "Acute/PICU"
+        },
         "Cygnet Hospital Clifton": {
             "beds": 1,
             "purpose": "PDU"
         },
-        "Cygnet Hospital Bury": {
-            "beds": 2,
-            "purpose": "Acute/PICU"
-        },
         "Cygnet Hospital Wyke": {
             "beds": 3,
+            "purpose": "Acute/PICU"
+        },
+        "Cygnet Hospital Sherwood": {
+            "beds": 2,
             "purpose": "Acute/PICU"
         },
         "Cygnet Victoria House": {
             "beds": 2,
             "purpose": "Acute/PICU"
         },
-        "Cygnet Hospital Sherwood": {
+        "Cygnet Hospital Stevenage": {
             "beds": 1,
             "purpose": "Acute/PICU"
         },
@@ -126,16 +130,16 @@
             "beds": 1,
             "purpose": "Acute/PICU"
         },
-        "Cygnet Hospital Stevenage": {
-            "beds": 1,
-            "purpose": "Acute/PICU"
-        },
         "Cygnet Hospital Godden Green": {
-            "beds": 1,
+            "beds": 2,
             "purpose": "Acute/PICU"
         },
         "Cygnet Hospital Taunton": {
             "beds": 3,
+            "purpose": "Acute/PICU"
+        },
+        "Cygnet Hospital Woking": {
+            "beds": 2,
             "purpose": "Acute/PICU"
         },
         "Cygnet Hospital Hexham": {
@@ -146,8 +150,8 @@
             "beds": 2,
             "purpose": "Acute/PICU"
         },
-        "Cygnet Hospital Woking": {
-            "beds": 1,
+        "Cygnet Hospital Stevenage": {
+            "beds": 2,
             "purpose": "Acute/PICU"
         }
     }
