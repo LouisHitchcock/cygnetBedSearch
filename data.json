@@ -80,6 +80,10 @@
             "beds": 2,
             "purpose": "Acute/PICU"
         },
+        "Cygnet Hospital Harrow": {
+            "beds": 1,
+            "purpose": "Acute/PICU"
+        },
         "Cygnet Hospital Stevenage": {
             "beds": 1,
             "purpose": "Acute/PICU"
