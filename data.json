@@ -87,10 +87,6 @@
         "Cygnet Victoria House": {
             "beds": 1,
             "purpose": "Acute/PICU"
-        },
-        "Cygnet Hospital Harrow": {
-            "beds": 1,
-            "purpose": "Acute/PICU"
         }
     },
     "female_wards": {
@@ -115,7 +111,7 @@
             "purpose": "Rehab"
         },
         "Cygnet Hospital Beckton": {
-            "beds": 2,
+            "beds": 3,
             "purpose": "Acute/PICU"
         },
         "Cygnet Maple House": {
@@ -131,22 +127,22 @@
             "purpose": "PDU"
         },
         "Cygnet Appletree": {
-            "beds": 2,
+            "beds": 4,
             "purpose": "Acute/PICU"
         },
         "Cygnet Hospital Godden Green": {
             "beds": 2,
             "purpose": "Acute/PICU"
         },
-        "Cygnet Hospital Hexham": {
+        "Cygnet Hospital Woking": {
             "beds": 2,
+            "purpose": "Acute/PICU"
+        },
+        "Cygnet Hospital Hexham": {
+            "beds": 1,
             "purpose": "Acute/PICU"
         },
         "Cygnet Hospital Taunton": {
-            "beds": 2,
-            "purpose": "Acute/PICU"
-        },
-        "Cygnet Hospital Woking": {
             "beds": 2,
             "purpose": "Acute/PICU"
         },
