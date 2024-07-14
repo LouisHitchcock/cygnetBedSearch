@@ -76,12 +76,12 @@
             "beds": 2,
             "purpose": "Acute/PICU"
         },
-        "Cygnet Hospital Stevenage": {
-            "beds": 1,
-            "purpose": "Acute/PICU"
-        },
         "Cygnet Hospital Blackheath": {
             "beds": 2,
+            "purpose": "Acute/PICU"
+        },
+        "Cygnet Hospital Stevenage": {
+            "beds": 1,
             "purpose": "Acute/PICU"
         },
         "Cygnet Victoria House": {
