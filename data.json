@@ -127,11 +127,7 @@
             "purpose": "Acute/PICU"
         },
         "Cygnet Hospital Godden Green": {
-            "beds": 2,
-            "purpose": "Acute/PICU"
-        },
-        "Cygnet Hospital Taunton": {
-            "beds": 3,
+            "beds": 1,
             "purpose": "Acute/PICU"
         },
         "Cygnet Hospital Woking": {
@@ -142,8 +138,8 @@
             "beds": 2,
             "purpose": "Acute/PICU"
         },
-        "Cygnet Hospital Stevenage": {
-            "beds": 1,
+        "Cygnet Hospital Taunton": {
+            "beds": 2,
             "purpose": "Acute/PICU"
         }
     }
