@@ -77,7 +77,7 @@
             "purpose": "Acute/PICU"
         },
         "Cygnet Hospital Stevenage": {
-            "beds": 1,
+            "beds": 2,
             "purpose": "Acute/PICU"
         },
         "Cygnet Hospital Blackheath": {
@@ -139,6 +139,10 @@
             "purpose": "Acute/PICU"
         },
         "Cygnet Hospital Taunton": {
+            "beds": 2,
+            "purpose": "Acute/PICU"
+        },
+        "Cygnet Hospital Stevenage": {
             "beds": 2,
             "purpose": "Acute/PICU"
         }
