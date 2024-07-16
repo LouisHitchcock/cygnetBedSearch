@@ -46,15 +46,34 @@
     <script src="https://apis.google.com/js/api.js"></script>
 
     <script>
+        var CLIENT_ID = '1058605601312-89fgoocsjd8mmdqq9vr5q1djt3o61d6f.apps.googleusercontent.com';  // Replace with your Client ID
+        var API_KEY = 'AIzaSyC9YCMS5_d4E9hhPUklf58kAabJ2BFu7TM';  // Replace with your API key
+        var DISCOVERY_DOCS = ["https://sheets.googleapis.com/$discovery/rest?version=v4"];
+        var SCOPES = "https://www.googleapis.com/auth/spreadsheets.readonly";
+
+        function handleClientLoad() {
+            gapi.load('client:auth2', initClient);
+        }
+
         function initClient() {
             gapi.client.init({
-                'apiKey': 'AIzaSyChbKzRoqizsa9GtVssNSBoJ5zAhZphmTs',
-                'discoveryDocs': ['https://sheets.googleapis.com/$discovery/rest?version=v4']
+                apiKey: API_KEY,
+                clientId: CLIENT_ID,
+                discoveryDocs: DISCOVERY_DOCS,
+                scope: SCOPES
             }).then(function () {
-                return gapi.client.sheets.spreadsheets.values.get({
-                    spreadsheetId: '1j1vRt47CWTPuQy7xxUBSQeN4GJrtfLaBFc6RTRvUne4',
-                    range: 'Sheet1!A2:D' // Adjust the range as needed
+                gapi.auth2.getAuthInstance().signIn().then(function() {
+                    listMajors();
                 });
+            }, function(error) {
+                console.error(JSON.stringify(error, null, 2));
+            });
+        }
+
+        function listMajors() {
+            gapi.client.sheets.spreadsheets.values.get({
+                spreadsheetId: '1j1vRt47CWTPuQy7xxUBSQeN4GJrtfLaBFc6RTRvUne4',  // Replace with your spreadsheet ID
+                range: 'Sheet1!A2:D'
             }).then(function(response) {
                 var range = response.result;
                 var maleWardsContainer = document.getElementById('male-wards');
@@ -70,62 +89,12 @@
                         femaleWardsContainer.innerHTML += `<div class="ward">${row[0]}, ${row[2]}, ${row[1]} Beds</div>`;
                     }
                 });
-            }).catch(function(error) {
-                console.error('Error fetching data', error);
+            }, function(response) {
+                console.error('Error: ' + response.result.error.message);
             });
         }
 
-        function fetchChangeLog() {
-            fetch('change_log.json')
-                .then(response => response.json())
-                .then(changeLog => {
-                    const dates = changeLog.map(entry => entry.timestamp);
-                    const changes = changeLog.map(entry => entry.changes);
-
-                    const ctx = document.getElementById('bedChangesChart').getContext('2d');
-                    new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: dates,
-                            datasets: [{
-                                label: 'Total Changes',
-                                data: changes,
-                                borderColor: 'rgba(75, 192, 192, 1)',
-                                borderWidth: 1
-                            }]
-                        },
-                        options: {
-                            scales: {
-                                x: {
-                                    type: 'time',
-                                    time: {
-                                        unit: 'day'
-                                    },
-                                    title: {
-                                        display: true,
-                                        text: 'Date'
-                                    }
-                                },
-                                y: {
-                                    beginAtZero: true,
-                                    title: {
-                                        display: true,
-                                        text: 'Total Changes'
-                                    }
-                                }
-                            }
-                        }
-                    });
-                })
-                .catch(error => {
-                    console.error('Failed to load change log', error);
-                });
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            gapi.load('client', initClient);
-            fetchChangeLog();
-        });
+        document.addEventListener('DOMContentLoaded', handleClientLoad);
     </script>
 </body>
 </html>
