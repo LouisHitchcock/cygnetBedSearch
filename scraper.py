@@ -3,6 +3,14 @@ from bs4 import BeautifulSoup
 import json
 from datetime import datetime
 import os
+import google.auth
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
+
+# Replace these with your own credentials and spreadsheet ID
+CLIENT_SECRET_FILE = './client_secret_1058605601312-89fgoocsjd8mmdqq9vr5q1djt3o61d6f.apps.googleusercontent.com.json'
+SPREADSHEET_ID = '1j1vRt47CWTPuQy7xxUBSQeN4GJrtfLaBFc6RTRvUne4'
+RANGE_NAME = 'Sheet1!A2:D'
 
 def get_bed_availability():
     headers = {
@@ -73,10 +81,45 @@ def log_changes(male_wards, female_wards):
     with open('change_log.json', 'w') as f:
         json.dump(change_log, f, indent=4)
 
+def update_google_sheet(male_wards, female_wards):
+    creds = None
+    if os.path.exists('token.json'):
+        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(
+                CLIENT_SECRET_FILE, SCOPES)
+            creds = flow.run_local_server(port=0)
+        with open('token.json', 'w') as token:
+            token.write(creds.to_json())
+
+    service = build('sheets', 'v4', credentials=creds)
+    sheet = service.spreadsheets()
+
+    values = []
+    for ward, info in male_wards.items():
+        values.append([ward, info['beds'], info['purpose'], 'Male'])
+    for ward, info in female_wards.items():
+        values.append([ward, info['beds'], info['purpose'], 'Female'])
+
+    body = {
+        'values': values
+    }
+    result = sheet.values().update(
+        spreadsheetId=SPREADSHEET_ID,
+        range=RANGE_NAME,
+        valueInputOption="RAW",
+        body=body
+    ).execute()
+    print(f"{result.get('updatedCells')} cells updated.")
+
 def main():
     male_wards, female_wards = get_bed_availability()
     save_data(male_wards, female_wards)
     log_changes(male_wards, female_wards)
+    update_google_sheet(male_wards, female_wards)
 
 if __name__ == "__main__":
     main()

@@ -47,7 +47,7 @@
     <script src="https://apis.google.com/js/api.js" async defer onload="gapiLoaded()"></script>
 
     <script>
-        var CLIENT_ID = '1058605601312-89fgoocsjd8mmdqq9vr5q1djt3o61d6f.apps.googleusercontent.com';  // Replace with your Client ID
+        var CLIENT_ID = '1058605601312-89fgoocsjd8mmdqq9vr5q1djt3o61d6f.apps.googleusercontent.com ';  // Replace with your Client ID
         var API_KEY = 'AIzaSyC9YCMS5_d4E9hhPUklf58kAabJ2BFu7TM';  // Replace with your API key
         var DISCOVERY_DOCS = ["https://sheets.googleapis.com/$discovery/rest?version=v4"];
         var SCOPES = "https://www.googleapis.com/auth/spreadsheets.readonly";
@@ -93,10 +93,8 @@
             };
 
             if (gapi.client.getToken() === null) {
-                // Prompt the user to select a Google Account and authorize the application to access requested scopes.
                 tokenClient.requestAccessToken({prompt: 'consent'});
             } else {
-                // Skip display of account chooser and consent dialog for an existing token.
                 tokenClient.requestAccessToken({prompt: ''});
             }
         }
@@ -108,6 +106,7 @@
                     spreadsheetId: '1j1vRt47CWTPuQy7xxUBSQeN4GJrtfLaBFc6RTRvUne4',  // Replace with your spreadsheet ID
                     range: 'Sheet1!A2:D',
                 });
+                console.log(response); // Log the response for debugging
             } catch (err) {
                 console.error(err.message);
                 return;
