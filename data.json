@@ -80,6 +80,10 @@
             "beds": 2,
             "purpose": "Acute/PICU"
         },
+        "Cygnet Victoria House": {
+            "beds": 1,
+            "purpose": "Acute/PICU"
+        },
         "Cygnet Hospital Blackheath": {
             "beds": 1,
             "purpose": "Acute/PICU"
@@ -131,14 +135,14 @@
             "purpose": "Acute/PICU"
         },
         "Cygnet Hospital Godden Green": {
-            "beds": 3,
-            "purpose": "Acute/PICU"
-        },
-        "Cygnet Hospital Hexham": {
-            "beds": 2,
+            "beds": 1,
             "purpose": "Acute/PICU"
         },
         "Cygnet Hospital Taunton": {
+            "beds": 2,
+            "purpose": "Acute/PICU"
+        },
+        "Cygnet Hospital Hexham": {
             "beds": 2,
             "purpose": "Acute/PICU"
         },
