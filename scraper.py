@@ -12,6 +12,7 @@ from googleapiclient.discovery import build
 CLIENT_SECRET_FILE = './client_secret_1058605601312-89fgoocsjd8mmdqq9vr5q1djt3o61d6f.apps.googleusercontent.com.json'
 SPREADSHEET_ID = '1j1vRt47CWTPuQy7xxUBSQeN4GJrtfLaBFc6RTRvUne4'
 RANGE_NAME = 'Sheet1!A2:D'
+SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
 def get_bed_availability():
     headers = {
@@ -90,8 +91,7 @@ def update_google_sheet(male_wards, female_wards):
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                CLIENT_SECRET_FILE, SCOPES)
+            flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRET_FILE, SCOPES)
             creds = flow.run_local_server(port=0)
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
