@@ -43,74 +43,87 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+
     <script>
-        async function fetchData() {
-            const response = await fetch('data.json');
-            const data = await response.json();
-            const maleWardsContainer = document.getElementById('male-wards');
-            const femaleWardsContainer = document.getElementById('female-wards');
+        function initClient() {
+            gapi.client.init({
+                'apiKey': 'AIzaSyChbKzRoqizsa9GtVssNSBoJ5zAhZphmTs',
+                'discoveryDocs': ['https://sheets.googleapis.com/$discovery/rest?version=v4']
+            }).then(function () {
+                return gapi.client.sheets.spreadsheets.values.get({
+                    spreadsheetId: '1j1vRt47CWTPuQy7xxUBSQeN4GJrtfLaBFc6RTRvUne4',
+                    range: 'Sheet1!A2:D' // Adjust the range as needed
+                });
+            }).then(function(response) {
+                var range = response.result;
+                var maleWardsContainer = document.getElementById('male-wards');
+                var femaleWardsContainer = document.getElementById('female-wards');
 
-            maleWardsContainer.innerHTML = '';
-            femaleWardsContainer.innerHTML = '';
+                maleWardsContainer.innerHTML = '';
+                femaleWardsContainer.innerHTML = '';
 
-            for (const [ward, info] of Object.entries(data.male_wards)) {
-                maleWardsContainer.innerHTML += `<div class="ward">${ward}, ${info.purpose}, ${info.beds} Beds</div>`;
-            }
-
-            for (const [ward, info] of Object.entries(data.female_wards)) {
-                femaleWardsContainer.innerHTML += `<div class="ward">${ward}, ${info.purpose}, ${info.beds} Beds</div>`;
-            }
-        }
-
-        async function fetchChangeLog() {
-            const response = await fetch('change_log.json');
-            if (!response.ok) {
-                console.error('Failed to load change log');
-                return;
-            }
-            const changeLog = await response.json();
-
-            const dates = changeLog.map(entry => entry.timestamp);
-            const changes = changeLog.map(entry => entry.changes);
-
-            const ctx = document.getElementById('bedChangesChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: dates,
-                    datasets: [{
-                        label: 'Total Changes',
-                        data: changes,
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    scales: {
-                        x: {
-                            type: 'time',
-                            time: {
-                                unit: 'day'
-                            },
-                            title: {
-                                display: true,
-                                text: 'Date'
-                            }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Total Changes'
-                            }
-                        }
+                range.values.forEach(row => {
+                    if (row[3] === 'Male') {
+                        maleWardsContainer.innerHTML += `<div class="ward">${row[0]}, ${row[2]}, ${row[1]} Beds</div>`;
+                    } else if (row[3] === 'Female') {
+                        femaleWardsContainer.innerHTML += `<div class="ward">${row[0]}, ${row[2]}, ${row[1]} Beds</div>`;
                     }
-                }
+                });
+            }).catch(function(error) {
+                console.error('Error fetching data', error);
             });
         }
 
+        function fetchChangeLog() {
+            fetch('change_log.json')
+                .then(response => response.json())
+                .then(changeLog => {
+                    const dates = changeLog.map(entry => entry.timestamp);
+                    const changes = changeLog.map(entry => entry.changes);
+
+                    const ctx = document.getElementById('bedChangesChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: dates,
+                            datasets: [{
+                                label: 'Total Changes',
+                                data: changes,
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                x: {
+                                    type: 'time',
+                                    time: {
+                                        unit: 'day'
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: 'Date'
+                                    }
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Total Changes'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Failed to load change log', error);
+                });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
-            fetchData();
+            gapi.load('client', initClient);
             fetchChangeLog();
         });
     </script>
