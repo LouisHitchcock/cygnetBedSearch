@@ -29,7 +29,6 @@ jobs:
       run: |
         python Beds.py
         git config --global user.name 'github-actions'
-        git config --global user.email 'github-actions@github.com'
         git add bed_data_combined.csv
         git commit -m 'Update bed data'
         git push
