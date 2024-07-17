@@ -35,7 +35,7 @@
     </table>
     <script>
         async function fetchData() {
-            const response = await fetch('https://your-username.github.io/bed-data-tracker/bed_data.csv');
+            const response = await fetch('https://louisHitchcock.github.io/cygnetBedSearch/bed_data.csv');
             const data = await response.text();
             const rows = data.split('\n').slice(1);
             const tbody = document.querySelector('#bedTable tbody');
@@ -74,7 +74,7 @@ function highlightSpecificUnits(rows, unitNames) {
 }
 
 async function fetchData() {
-    const response = await fetch('https://your-username.github.io/bed-data-tracker/bed_data.csv');
+    const response = await fetch('https://louisHitchcock.github.io/cygnetBedSearch/bed_data.csv');
     const data = await response.text();
     const rows = data.split('\n').slice(1);
     const currentData = rows.map(row => row.split(','));
