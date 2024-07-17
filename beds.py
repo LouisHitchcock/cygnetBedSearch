@@ -69,15 +69,15 @@ def compare_data(old_data, new_data):
 
 def print_differences(differences, ward_type):
     print(f"{ward_type} Ward Differences:")
-    if differences["added"]():
+    if differences["added"]:
         print("Added:")
         for ward, beds in differences["added"].items():
             print(f"  - {ward}: {beds} beds")
-    if differences["removed"]():
+    if differences["removed"]:
         print("Removed:")
         for ward, beds in differences["removed"].items():
             print(f"  - {ward}: {beds} beds")
-    if differences["updated"]():
+    if differences["updated"]:
         print("Updated:")
         for ward, change in differences["updated"].items():
             print(f"  - {ward}: {change['old']} -> {change['new']} beds")
@@ -148,7 +148,7 @@ def main():
     combined_df = pd.concat([current_df, provided_data], ignore_index=True)
     
     # Save to CSV
-    combined_df.to_csv('bed_data_combined.csv', index=False)
+    combined_df.to_csv('bed_data.csv', index=False)
 
 if __name__ == "__main__":
     main()
