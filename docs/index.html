@@ -36,9 +36,15 @@
     </table>
     <script>
         function getChangeCount(currentData, previousData) {
-            const changeCounts = currentData.map((row, index) => {
-                if (previousData[index]) {
-                    return Math.abs(row[4] - previousData[index][4]);
+            const changeCounts = currentData.map((row) => {
+                const prevRow = previousData.find(prev => prev[0] === row[0]);
+                if (prevRow) {
+                    const currentTime = new Date(row[5]);
+                    const previousTime = new Date(prevRow[5]);
+                    const timeDiff = Math.abs(currentTime - previousTime) / 36e5; // Difference in hours
+                    if (timeDiff <= 24) {
+                        return Math.abs(row[4] - prevRow[4]);
+                    }
                 }
                 return 0;
             });
@@ -57,12 +63,17 @@
         }
 
         async function fetchData() {
-            const response = await fetch('https://louishitchcock.github.io/cygnetBedSearch/bed_data.csv');
-            const data = await response.text();
-            const rows = data.split('\n').slice(1);  // Updated split to correct newline character
-            const currentData = rows.map(row => row.split(','));
-            const previousData = JSON.parse(localStorage.getItem('previousData')) || [];
-            localStorage.setItem('previousData', JSON.stringify(currentData));
+            const responseCurrent = await fetch('https://louishitchcock.github.io/cygnetBedSearch/bed_data.csv');
+            const responseOld = await fetch('https://louishitchcock.github.io/cygnetBedSearch/old-data.csv');
+
+            const dataCurrent = await responseCurrent.text();
+            const dataOld = await responseOld.text();
+
+            const rowsCurrent = dataCurrent.split('\n').slice(1);
+            const rowsOld = dataOld.split('\n').slice(1);
+
+            const currentData = rowsCurrent.map(row => row.split(','));
+            const previousData = rowsOld.map(row => row.split(','));
 
             const changeCounts = getChangeCount(currentData, previousData);
             const sortedData = sortDataByChanges(currentData, changeCounts);

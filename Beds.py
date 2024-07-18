@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 import os
+from datetime import datetime
 
 # List of URLs to scrape along with their respective purposes
 URLS = [
@@ -16,6 +17,7 @@ def get_bed_availability():
     }
     
     data = []
+    timestamp = datetime.now().isoformat()
     
     for url, purpose in URLS:
         response = requests.get(url, headers=headers)
@@ -41,19 +43,28 @@ def get_bed_availability():
                         elif any('icon--female' in gender['class'] for gender in gender_classes):
                             gender = "Female"
 
-                    data.append([ward_name, ward_name.split()[-1], gender, purpose, bed_count, "Last Updated Date Here"])
+                    data.append([ward_name, "Unknown", gender, purpose, bed_count, timestamp])
         else:
             print(f"Failed to retrieve data from {url}: {response.status_code}")
 
     return data
 
+def move_old_data():
+    if os.path.exists('bed_data.csv'):
+        if os.path.exists('old-data.csv'):
+            os.remove('old-data.csv')
+        os.rename('bed_data.csv', 'old-data.csv')
+
 def save_to_csv(data):
     with open('bed_data.csv', 'w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(['Name', 'Location', 'Gender', 'Purpose', 'Beds', 'Last Updated'])
+        writer.writerow(['name', 'location', 'gender', 'purpose', 'beds', 'timestamp'])
         writer.writerows(data)
 
 def main():
+    # Move current data to old data
+    move_old_data()
+
     # Get current bed availability data
     data = get_bed_availability()
     
