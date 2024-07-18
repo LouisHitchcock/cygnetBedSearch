@@ -29,25 +29,31 @@
                 <th>Purpose</th>
                 <th>Beds</th>
                 <th>Last Updated</th>
+                <th>Changes in 24hrs</th>
             </tr>
         </thead>
         <tbody></tbody>
     </table>
     <script>
-        function highlightChanges(currentData, previousData) {
-            const changedRows = [];
-            currentData.forEach((row, index) => {
-                if (previousData[index] && row[4] !== previousData[index][4]) {
-                    changedRows.push(index);
+        function getChangeCount(currentData, previousData) {
+            const changeCounts = currentData.map((row, index) => {
+                if (previousData[index]) {
+                    return Math.abs(row[4] - previousData[index][4]);
                 }
+                return 0;
             });
-            return changedRows;
+            return changeCounts;
         }
 
-        function highlightSpecificUnits(rows, unitNames) {
-            return rows.map((row, index) => {
-                return unitNames.includes(row[0]) ? index : null;
-            }).filter(index => index !== null);
+        function sortDataByChanges(currentData, changeCounts) {
+            return currentData.map((row, index) => [...row, changeCounts[index]])
+                             .sort((a, b) => b[b.length - 1] - a[a.length - 1]);
+        }
+
+        function colorFromChangeCount(changeCount) {
+            const maxChanges = 10; // Adjust this based on expected max changes
+            const redIntensity = Math.min(255, changeCount * 25);
+            return `rgb(255, ${255 - redIntensity}, ${255 - redIntensity})`;
         }
 
         async function fetchData() {
@@ -55,31 +61,34 @@
             const data = await response.text();
             const rows = data.split('\n').slice(1);  // Updated split to correct newline character
             const currentData = rows.map(row => row.split(','));
-
             const previousData = JSON.parse(localStorage.getItem('previousData')) || [];
             localStorage.setItem('previousData', JSON.stringify(currentData));
 
+            const changeCounts = getChangeCount(currentData, previousData);
+            const sortedData = sortDataByChanges(currentData, changeCounts);
+
             const tbody = document.querySelector('#bedTable tbody');
             tbody.innerHTML = '';
-            const changedRows = highlightChanges(currentData, previousData);
-            const specificUnits = highlightSpecificUnits(currentData, ['Cygnet Hospital Derby', 'Cygnet Aspen House']); // Example units
 
-            currentData.forEach((cols, index) => {
+            sortedData.forEach((cols, index) => {
                 const tr = document.createElement('tr');
-                if (changedRows.includes(index)) {
-                    tr.style.backgroundColor = '#ffdddd';
-                }
-                if (specificUnits.includes(index)) {
-                    tr.style.fontWeight = 'bold';
-                }
-                cols.forEach(col => {
+                const changeCount = cols[cols.length - 1];
+                tr.style.backgroundColor = colorFromChangeCount(changeCount);
+
+                cols.forEach((col, colIndex) => {
                     const td = document.createElement('td');
                     td.textContent = col;
                     tr.appendChild(td);
                 });
+
+                const changeTd = document.createElement('td');
+                changeTd.textContent = changeCount;
+                tr.appendChild(changeTd);
+
                 tbody.appendChild(tr);
             });
         }
+
         fetchData();
         setInterval(fetchData, 6 * 60 * 60 * 1000); // 6 hours
     </script>
