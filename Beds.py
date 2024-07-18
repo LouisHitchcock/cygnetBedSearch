@@ -1,24 +1,23 @@
 import requests
 from bs4 import BeautifulSoup
-import json
+import csv
 import os
-import pandas as pd
-import datetime
+
+# List of URLs to scrape along with their respective purposes
+URLS = [
+    ("https://www.cygnetgroup.com/professionals/bed-placement-search/?select-service=health-care-services&service=84&social_care_service=&gender=all", "Rehab"),
+    ("https://www.cygnetgroup.com/professionals/bed-placement-search/?select-service=&service=87&social_care_service=&gender=all", "PDU"),
+    ("https://www.cygnetgroup.com/professionals/bed-placement-search/?select-service=&service=81&social_care_service=&gender=all", "Acute/PICU")
+]
 
 def get_bed_availability():
-    urls = [
-        "https://www.cygnetgroup.com/professionals/bed-placement-search/?select-service=health-care-services&service=84&social_care_service=&gender=all",
-        "https://www.cygnetgroup.com/professionals/bed-placement-search/?select-service=&service=87&social_care_service=&gender=all",
-        "https://www.cygnetgroup.com/professionals/bed-placement-search/?select-service=&service=81&social_care_service=&gender=all"
-    ]
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
-
-    male_wards = {}
-    female_wards = {}
-
-    for url in urls:
+    
+    data = []
+    
+    for url, purpose in URLS:
         response = requests.get(url, headers=headers)
         
         if response.status_code == 200:
@@ -27,128 +26,40 @@ def get_bed_availability():
             bed_results = soup.find_all('article', class_='result')
             
             for result in bed_results:
-                ward_name = result.find('h1', class_='result__heading').text.strip()
+                ward_name_element = result.find('h1', class_='result__heading')
                 bed_count_element = result.find('div', class_='result__quantity-heading')
                 gender_element = result.find('span', class_='result__icons')
 
-                if bed_count_element:
+                if ward_name_element and bed_count_element:
+                    ward_name = ward_name_element.text.strip()
                     bed_count = int(bed_count_element.text.strip().split()[0])
-                    if bed_count > 0:
-                        if gender_element:
-                            gender_classes = gender_element.find_all('span')
-                            if any('icon--male' in gender['class'] for gender in gender_classes):
-                                male_wards[ward_name] = bed_count
-                            elif any('icon--female' in gender['class'] for gender in gender_classes):
-                                female_wards[ward_name] = bed_count
+                    gender = "Mixed"
+                    if gender_element:
+                        gender_classes = gender_element.find_all('span')
+                        if any('icon--male' in gender['class'] for gender in gender_classes):
+                            gender = "Male"
+                        elif any('icon--female' in gender['class'] for gender in gender_classes):
+                            gender = "Female"
 
-    return male_wards, female_wards
+                    data.append([ward_name, ward_name.split()[-1], gender, purpose, bed_count, "Last Updated Date Here"])
+        else:
+            print(f"Failed to retrieve data from {url}: {response.status_code}")
 
-def load_previous_data(file_path):
-    if os.path.exists(file_path):
-        with open(file_path, 'r') as file:
-            return json.load(file)
-    return {}
+    return data
 
-def save_current_data(file_path, male_wards, female_wards):
-    with open(file_path, 'w') as file:
-        json.dump({'male_wards': male_wards, 'female_wards': female_wards}, file, indent=4)
-
-def compare_data(old_data, new_data):
-    differences = {"added": {}, "removed": {}, "updated": {}}
-    for ward, beds in new_data.items():
-        if ward not in old_data:
-            differences["added"][ward] = beds
-        elif old_data[ward] != beds:
-            differences["updated"][ward] = {"old": old_data[ward], "new": beds}
-
-    for ward in old_data:
-        if ward not in new_data:
-            differences["removed"][ward] = old_data[ward]
-
-    return differences
-
-def print_differences(differences, ward_type):
-    print(f"{ward_type} Ward Differences:")
-    if differences["added"]:
-        print("Added:")
-        for ward, beds in differences["added"].items():
-            print(f"  - {ward}: {beds} beds")
-    if differences["removed"]:
-        print("Removed:")
-        for ward, beds in differences["removed"].items():
-            print(f"  - {ward}: {beds} beds")
-    if differences["updated"]:
-        print("Updated:")
-        for ward, change in differences["updated"].items():
-            print(f"  - {ward}: {change['old']} -> {change['new']} beds")
-    if not any(differences.values()):
-        print("  No changes")
-
-def print_current_beds(male_wards, female_wards):
-    print("Current Bed Availability:")
-    print("\nMale Wards:")
-    for ward, beds in male_wards.items():
-        print(f"  - {ward}: {beds} beds")
-    
-    print("\nFemale Wards:")
-    for ward, beds in female_wards.items():
-        print(f"  - {ward}: {beds} beds")
+def save_to_csv(data):
+    with open('bed_data.csv', 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Name', 'Location', 'Gender', 'Purpose', 'Beds', 'Last Updated'])
+        writer.writerows(data)
 
 def main():
-    data_file = 'bed_availability.json'
-    
     # Get current bed availability data
-    current_male_wards, current_female_wards = get_bed_availability()
+    data = get_bed_availability()
     
-    # Print current bed availability
-    print_current_beds(current_male_wards, current_female_wards)
-    
-    # Load previous data
-    previous_data = load_previous_data(data_file)
-    
-    # Compare previous and current data
-    male_differences = compare_data(previous_data.get('male_wards', {}), current_male_wards)
-    female_differences = compare_data(previous_data.get('female_wards', {}), current_female_wards)
-    
-    # Print differences
-    print("\nChanges Since Last Check:")
-    print_differences(male_differences, "Male")
-    print_differences(female_differences, "Female")
-    
-    # Save current data
-    save_current_data(data_file, current_male_wards, current_female_wards)
-    
-    # Load provided data
-    provided_data = pd.read_csv('provided_ward_data.csv')
-    
-    # Format current data into DataFrame
-    current_data = []
-    for ward, beds in current_male_wards.items():
-        current_data.append({
-            'name': ward,
-            'location': "Unknown",
-            'gender': "Male",
-            'purpose': "Unknown",
-            'beds': beds,
-            'timestamp': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        })
-    for ward, beds in current_female_wards.items():
-        current_data.append({
-            'name': ward,
-            'location': "Unknown",
-            'gender': "Female",
-            'purpose': "Unknown",
-            'beds': beds,
-            'timestamp': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        })
-    
-    current_df = pd.DataFrame(current_data)
-    
-    # Combine with provided data
-    combined_df = pd.concat([current_df, provided_data], ignore_index=True)
-    
-    # Save to CSV
-    combined_df.to_csv('bed_data.csv', index=False)
+    # Save current data to CSV
+    save_to_csv(data)
 
 if __name__ == "__main__":
     main()
+    print("Data has been written to bed_data.csv")
