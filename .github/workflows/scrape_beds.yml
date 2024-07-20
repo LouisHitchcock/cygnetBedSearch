@@ -1,0 +1,37 @@
+name: Run Scraper Every 6 Hours
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"  # This runs the workflow every 6 hours
+  workflow_dispatch:       # Allows manual triggering of the workflow
+
+jobs:
+  run-scraper:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests beautifulsoup4
+
+    - name: Run scraper
+      run: python scrape_beds.py
+
+    - name: Commit and push changes
+      run: |
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
+        git add bed_data.csv || echo "No changes to add"
+        git commit -m 'Update bed data' || echo "No changes to commit"
+        git push || echo "No changes to push"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
