@@ -2,7 +2,7 @@ name: Run Scraper Every 6 Hours
 
 on:
   schedule:
-    - cron: "0 */6 * * *"  # This runs the workflow every 6 hours
+    - cron: "0 10 * * *"  # This runs the workflow every day at 10 AM
   workflow_dispatch:       # Allows manual triggering of the workflow
   push:
     branches:
