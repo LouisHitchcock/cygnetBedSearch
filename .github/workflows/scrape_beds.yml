@@ -4,9 +4,9 @@ on:
   schedule:
     - cron: "0 10 * * *"  # This runs the workflow every day at 10 AM
   workflow_dispatch:       # Allows manual triggering of the workflow
-  push:
-    branches:
-      - main  # Runs the workflow when changes are pushed to the main branch
+  # push:
+    # branches:
+    #   - main  # Runs the workflow when changes are pushed to the main branch
 
 jobs:
   run-scraper:
