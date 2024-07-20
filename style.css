@@ -1,0 +1,35 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+h1 {
+    text-align: center;
+}
+.hospital-card {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 20px auto;
+    max-width: 1200px;
+    background-color: #f9f9f9;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+.hospital-card h2 {
+    margin-top: 0;
+}
+.hospital-card .details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.hospital-card .details .info {
+    width: 45%;
+}
+.hospital-card .details .chart-container {
+    width: 80%;
+    height: 300px;
+}
+canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
