@@ -52,8 +52,8 @@ def get_bed_availability():
     return data
 
 def save_to_csv(data):
-    file_exists = os.path.isfile('bed_data.csv')
-    with open('bed_data.csv', 'a', newline='') as file:
+    file_exists = os.path.isfile('./scraper/bed_data.csv')
+    with open('./scraper/bed_data.csv', 'a', newline='') as file:
         writer = csv.writer(file)
         if not file_exists:
             writer.writerow(['Name', 'Sex', 'Number of Beds', 'Purpose', 'Date', 'Time'])
