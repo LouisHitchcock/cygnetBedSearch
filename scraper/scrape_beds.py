@@ -68,4 +68,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-    print("Data has been added to bed_data.csv")
+    print("Data has been added to ./scraper/bed_data.csv")
