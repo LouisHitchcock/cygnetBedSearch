@@ -2,14 +2,14 @@
 
 [![Build Status](https://github.com/louishitchcock/cygnetBedSearch/actions/workflows/scrape_beds.yml/badge.svg)](https://github.com/louishitchcock/cygnetBedSearch/actions)
 
-This project contains a web scraper that collects bed availability data from Cygnet Health Care's website and displays it on a web page. The scraper runs every 6 hours using GitHub Actions and appends the latest data to a CSV file. The data is then visualized on a web page using Chart.js.
+This project contains a web scraper that collects bed availability data from Cygnet Health Care's website and displays it on a web page. The scraper runs every day at 10am using GitHub Actions and appends the latest data to a CSV file. The data is then visualized on a web page using Chart.js.
 
 ## Features
 
 - Scrapes bed availability data from specified URLs.
 - Appends new data to an existing CSV file without overwriting previous data.
 - Visualizes the data on a web page using Chart.js.
-- Automated data scraping every 6 hours using GitHub Actions.
+- Automated data scraping every day using GitHub Actions.
 
 ## Project Structure
 
@@ -48,7 +48,7 @@ The project is deployed on GitHub Pages. You can view the latest bed availabilit
 
 ## Automated Workflow
 
-The scraper runs every 6 hours using GitHub Actions. The workflow file `.github/workflows/scrape_beds.yml` defines the schedule and steps for running the scraper, committing new data, and pushing it to the repository.
+The scraper runs every day at 10am using GitHub Actions. The workflow file `.github/workflows/scrape_beds.yml` defines the schedule and steps for running the scraper, committing new data, and pushing it to the repository.
 
 ![Build Status](https://github.com/louishitchcock/cygnetBedSearch/actions/workflows/scrape_beds.yml/badge.svg)
 
