@@ -1,4 +1,4 @@
-name: Run Scraper Every 6 Hours
+name: Bed Scraper Ran at 10am
 
 on:
   schedule:
