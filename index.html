@@ -10,177 +10,221 @@
 </head>
 <body>
     <h1>Cygnet Bed Tracker</h1>
+
+    <!-- Search Form -->
+    <div class="search-container">
+        <form id="searchForm">
+            <label for="gender">Gender:</label>
+            <select id="gender" name="gender">
+                <option value="all">All</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+
+            <label for="purpose">Purpose:</label>
+            <select id="purpose" name="purpose">
+                <option value="all">All</option>
+                <option value="Acute/PICU">Acute/PICU</option>
+                <option value="rehab">Rehab</option>
+                <option value="pdu">PDU</option>
+            </select>
+
+            <button type="submit">Search</button>
+        </form>
+    </div>
+
     <div id="hospitalContainer"></div>
 
-<script>
-async function fetchData() {
-    const response = await fetch('./scraper/bed_data.csv');
-    const data = await response.text();
-    return data;
-}
-
-function parseCSV(data) {
-    const rows = data.split('\n').slice(1);
-    const parsedData = {};
-
-    rows.forEach(row => {
-        const columns = row.split(',').map(item => item.trim());
-        if (columns.length < 6) {
-            console.error(`Skipping invalid row (missing data): ${row}`);
-            return;
+    <script>
+        // Fetch data from the CSV file
+        async function fetchData() {
+            const response = await fetch('./scraper/bed_data.csv');
+            const data = await response.text();
+            return data;
         }
 
-        const [name, sex, beds, purpose, date, time] = columns;
+        // Parse CSV data into a usable format
+        function parseCSV(data) {
+            const rows = data.split('\n').slice(1);
+            const parsedData = {};
 
-        if (!name || !beds || !date || !time) {
-            console.error(`Skipping invalid row (missing critical data): ${row}`);
-            return;
+            rows.forEach(row => {
+                const columns = row.split(',').map(item => item.trim());
+                if (columns.length < 6) {
+                    console.error(`Skipping invalid row (missing data): ${row}`);
+                    return;
+                }
+
+                const [name, sex, beds, purpose, date, time] = columns;
+
+                if (!name || !beds || !date || !time) {
+                    console.error(`Skipping invalid row (missing critical data): ${row}`);
+                    return;
+                }
+
+                const dateObj = new Date(`${date}T${time}`);
+                if (isNaN(dateObj)) {
+                    console.error(`Invalid date format in row: ${row}`);
+                    return;
+                }
+
+                const hospitalName = `${name} (${purpose})`;
+
+                if (!parsedData[hospitalName]) {
+                    parsedData[hospitalName] = { data: [], sex: sex, currentBeds: beds, lastCheck: dateObj, purpose: purpose };
+                }
+
+                parsedData[hospitalName].data.push({ date: dateObj, beds: Number(beds) });
+                parsedData[hospitalName].currentBeds = beds;
+                parsedData[hospitalName].lastCheck = dateObj;
+                parsedData[hospitalName].purpose = purpose.toLowerCase(); // Convert to lowercase for consistent comparison
+            });
+
+            return parsedData;
         }
 
-        const dateObj = new Date(`${date}T${time}`);
-        if (isNaN(dateObj)) {
-            console.error(`Invalid date format in row: ${row}`);
-            return;
+        // Get unique dates from the data, optionally slicing the last 'days' days
+        function getDateLabels(data, days = 7) {
+            const dates = data.map(entry => entry.date);
+            const uniqueDates = Array.from(new Set(dates.map(date => date.toISOString().split('T')[0])));
+            return uniqueDates.slice(-days);
         }
 
-        const hospitalName = `${name} (${purpose})`;
-
-        if (!parsedData[hospitalName]) {
-            parsedData[hospitalName] = { data: [], sex: sex, currentBeds: beds, lastCheck: dateObj, purpose: purpose };
+        // Calculate total beds per day for each unique date
+        function getBedsPerDay(data, dates) {
+            const bedsPerDay = dates.map(date => {
+                const dayEntries = data.filter(entry => entry.date.toISOString().split('T')[0] === date);
+                const totalBeds = dayEntries.reduce((sum, entry) => sum + entry.beds, 0);
+                return totalBeds;
+            });
+            return bedsPerDay;
         }
 
-        parsedData[hospitalName].data.push({ date: dateObj, beds: Number(beds) });
-        parsedData[hospitalName].currentBeds = beds;
-        parsedData[hospitalName].lastCheck = dateObj;
-        parsedData[hospitalName].purpose = purpose;
-    });
+        // Event listener for the search form submission
+        document.getElementById('searchForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            createCharts();
+        });
 
-    return parsedData;
-}
+        // Create and render charts based on filtered data
+        async function createCharts() {
+            const rawData = await fetchData();
+            const parsedData = parseCSV(rawData);
 
-function getDateLabels(data) {
-    const dates = data.map(entry => entry.date);
-    const uniqueDates = Array.from(new Set(dates.map(date => date.toISOString().split('T')[0])));
-    return uniqueDates.slice(-7);
-}
+            const gender = document.getElementById('gender').value.toLowerCase();
+            const purpose = document.getElementById('purpose').value.toLowerCase();
 
-function getBedsPerDay(data, dates) {
-    const bedsPerDay = dates.map(date => {
-        const dayEntries = data.filter(entry => entry.date.toISOString().split('T')[0] === date);
-        const totalBeds = dayEntries.reduce((sum, entry) => sum + entry.beds, 0);
-        return totalBeds;
-    });
-    return bedsPerDay;
-}
+            const hospitalContainer = document.getElementById('hospitalContainer');
+            hospitalContainer.innerHTML = ''; // Clear previous content
 
-async function createCharts() {
-    const rawData = await fetchData();
-    const parsedData = parseCSV(rawData);
+            for (const hospital in parsedData) {
+                const hospitalSex = parsedData[hospital].sex.toLowerCase();
+                const hospitalPurpose = parsedData[hospital].purpose.toLowerCase();
 
-    console.log('Parsed Data:', parsedData);
+                // Filter based on user selection
+                if ((gender !== 'all' && hospitalSex !== gender) || (purpose !== 'all' && hospitalPurpose !== purpose)) {
+                    continue;
+                }
 
-    const hospitalContainer = document.getElementById('hospitalContainer');
-    hospitalContainer.innerHTML = ''; // Clear previous content
+                const dates = getDateLabels(parsedData[hospital].data, 30); // Get last 30 days
+                const bedData = getBedsPerDay(parsedData[hospital].data, dates);
+                const sex = parsedData[hospital].sex;
+                const currentBeds = parsedData[hospital].currentBeds;
+                const lastCheck = parsedData[hospital].lastCheck;
+                const purposeText = parsedData[hospital].purpose;
 
-    for (const hospital in parsedData) {
-        const dates = getDateLabels(parsedData[hospital].data);
-        const bedData = getBedsPerDay(parsedData[hospital].data, dates);
-        const sex = parsedData[hospital].sex;
-        const currentBeds = parsedData[hospital].currentBeds;
-        const lastCheck = parsedData[hospital].lastCheck;
-        const purpose = parsedData[hospital].purpose;
+                const cardDiv = document.createElement('div');
+                cardDiv.classList.add('hospital-card');
 
-        const cardDiv = document.createElement('div');
-        cardDiv.classList.add('hospital-card');
+                const hospitalName = document.createElement('h2');
+                hospitalName.textContent = hospital;
+                cardDiv.appendChild(hospitalName);
 
-        const hospitalName = document.createElement('h2');
-        hospitalName.textContent = hospital;
-        cardDiv.appendChild(hospitalName);
+                const detailsDiv = document.createElement('div');
+                detailsDiv.classList.add('details');
 
-        const detailsDiv = document.createElement('div');
-        detailsDiv.classList.add('details');
+                const infoDiv = document.createElement('div');
+                infoDiv.classList.add('info');
+                infoDiv.innerHTML = `
+                    <p>Number of Available Beds</p>
+                    <p>Currently: ${currentBeds}</p>
+                    <p>Last Check: ${lastCheck.toLocaleDateString()} - ${lastCheck.toLocaleTimeString()}</p>
+                    <p>Sex: ${sex}</p>
+                    <p>Purpose: ${purposeText}</p>
+                `;
+                detailsDiv.appendChild(infoDiv);
 
-        const infoDiv = document.createElement('div');
-        infoDiv.classList.add('info');
-        infoDiv.innerHTML = `
-            <p>Number of Available Beds</p>
-            <p>Currently: ${currentBeds}</p>
-            <p>Last Check: ${lastCheck.toLocaleDateString()} - ${lastCheck.toLocaleTimeString()}</p>
-            <p>Sex: ${sex}</p>
-            <p>Purpose: ${purpose}</p>
-        `;
-        detailsDiv.appendChild(infoDiv);
+                const chartDiv = document.createElement('div');
+                chartDiv.classList.add('chart-container');
+                const canvas = document.createElement('canvas');
+                canvas.id = `chart${hospital.replace(/\s+/g, '')}`;
+                chartDiv.appendChild(canvas);
+                detailsDiv.appendChild(chartDiv);
 
-        const chartDiv = document.createElement('div');
-        chartDiv.classList.add('chart-container');
-        const canvas = document.createElement('canvas');
-        canvas.id = `chart${hospital.replace(/\s+/g, '')}`;
-        chartDiv.appendChild(canvas);
-        detailsDiv.appendChild(chartDiv);
+                cardDiv.appendChild(detailsDiv);
+                hospitalContainer.appendChild(cardDiv);
 
-        cardDiv.appendChild(detailsDiv);
-        hospitalContainer.appendChild(cardDiv);
+                const ctx = canvas.getContext('2d');
 
-        const ctx = canvas.getContext('2d');
+                const borderColor = sex.toLowerCase() === 'female' ? 'rgba(255, 99, 132, 1)' : 'rgba(54, 162, 235, 1)';
+                const backgroundColor = sex.toLowerCase() === 'female' ? 'rgba(255, 99, 132, 0.2)' : 'rgba(54, 162, 235, 0.2)';
 
-        const borderColor = sex.toLowerCase() === 'female' ? 'rgba(255, 99, 132, 1)' : 'rgba(54, 162, 235, 1)';
-        const backgroundColor = sex.toLowerCase() === 'female' ? 'rgba(255, 99, 132, 0.2)' : 'rgba(54, 162, 235, 0.2)';
-
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: dates,
-                datasets: [{
-                    label: `Available Beds - ${hospital}`,
-                    data: bedData,
-                    fill: true,
-                    borderColor: borderColor,
-                    backgroundColor: backgroundColor,
-                    tension: 0.1
-                }]
-            },
-            options: {
-                scales: {
-                    x: {
-                        type: 'time',
-                        time: {
-                            unit: 'day',
-                            tooltipFormat: 'MMM dd, yyyy',
-                            displayFormats: {
-                                day: 'MMM dd'
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: dates,
+                        datasets: [{
+                            label: `Available Beds - ${hospital}`,
+                            data: bedData,
+                            fill: true,
+                            borderColor: borderColor,
+                            backgroundColor: backgroundColor,
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'day',
+                                    tooltipFormat: 'MMM dd, yyyy',
+                                    displayFormats: {
+                                        day: 'MMM dd'
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Date'
+                                }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Number of Beds'
+                                }
                             }
                         },
-                        title: {
-                            display: true,
-                            text: 'Date'
-                        }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Number of Beds'
-                        }
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false
+                            }
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false
                     }
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false
-                    }
-                },
-                responsive: true,
-                maintainAspectRatio: false
+                });
             }
-        });
-    }
-}
+        }
 
-createCharts();
-</script>
+        // Initial call to load the charts without filters
+        createCharts();
+    </script>
 </body>
 </html>

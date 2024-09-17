@@ -33,3 +33,54 @@ canvas {
     width: 100% !important;
     height: 100% !important;
 }
+
+/* Styling for the search container to match the card styling */
+.search-container {
+    margin: 20px auto; /* Center the search container itself */
+    padding: 15px;
+    background-color: #f9f9f9; /* Light background similar to the card */
+    border: 1px solid #e0e0e0; /* Soft border matching card styling */
+    border-radius: 8px; /* Rounded corners to match card */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    max-width: 800px; /* Limit the width to center it nicely */
+    display: flex;
+    justify-content: center; /* Center content horizontally */
+    align-items: center; /* Center content vertically */
+}
+
+/* Form elements within the search container */
+.search-container form {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Space between form elements */
+    flex-wrap: wrap; /* Wrap form elements on smaller screens */
+    justify-content: center; /* Center form elements within the form */
+}
+
+/* Styling for the labels */
+.search-container label {
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+/* Styling for select inputs and button to match overall look */
+.search-container select,
+.search-container button {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: #fff;
+    cursor: pointer;
+    transition: all 0.3s ease; /* Smooth hover effect */
+}
+
+.search-container button {
+    background-color: #007bff; /* Button background color */
+    color: #fff; /* Button text color */
+    border: none; /* Remove border for button */
+}
+
+.search-container button:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
