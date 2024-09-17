@@ -1,0 +1,100 @@
+name: Check Bed Data Changes
+
+# Schedule to run daily at 10:05 AM (UTC time)
+on:
+  schedule:
+    - cron: '5 10 * * *'  # Adjust the time as needed
+  workflow_dispatch:  # Allows manual triggering of the workflow
+
+jobs:
+  check_changes:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: pip install pandas
+
+      - name: Run data check and send email
+        env:
+          SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
+        run: |
+          python - <<EOF
+          import pandas as pd
+          import smtplib
+          from email.mime.multipart import MIMEMultipart
+          from email.mime.text import MIMEText
+          import os
+
+          # File paths for current and previous day data
+          file_path = 'scraper/bed_data.csv'
+          previous_file_path = 'scraper/bed_data_previous.csv'
+
+          # List of specific locations to check
+          locations_to_check = [
+              'Cygnet Hospital Bury (PDU)',
+              'Cygnet Hospital Clifton (PDU)',
+              'Gledholt Mews and Coach House (PDU)'
+          ]
+
+          # Function to send email notification
+          def send_email_notification(changes):
+              smtp_server = os.getenv('SMTP_SERVER')
+              smtp_port = int(os.getenv('SMTP_PORT', 587))
+              smtp_user = os.getenv('SMTP_USER')
+              smtp_password = os.getenv('SMTP_PASSWORD')
+
+              from_email = smtp_user
+              to_email = os.getenv('RECIPIENT_EMAIL')
+              subject = 'Bed Data Changes Detected'
+              body = f"Changes detected in bed data for the following locations:\n\n{changes}"
+
+              msg = MIMEMultipart()
+              msg['From'] = from_email
+              msg['To'] = to_email
+              msg['Subject'] = subject
+              msg.attach(MIMEText(body, 'plain'))
+
+              try:
+                  server = smtplib.SMTP(smtp_server, smtp_port)
+                  server.starttls()
+                  server.login(smtp_user, smtp_password)
+                  server.send_message(msg)
+                  server.quit()
+                  print("Email sent successfully.")
+              except Exception as e:
+                  print(f"Failed to send email: {e}")
+
+          # Load current day's data
+          current_data = pd.read_csv(file_path)
+
+          # Check if there is a previous day's data
+          if os.path.exists(previous_file_path):
+              previous_data = pd.read_csv(previous_file_path)
+              merged_data = pd.merge(current_data, previous_data, on='Location', suffixes=('_current', '_previous'))
+              changes_detected = []
+
+              for location in locations_to_check:
+                  location_data = merged_data[merged_data['Location'] == location]
+                  if not location_data.empty:
+                      if not location_data.iloc[:, 1:].equals(location_data.iloc[:, len(current_data.columns[1:]):]):
+                          changes_detected.append(location)
+
+              if changes_detected:
+                  changes_message = "\n".join(changes_detected)
+                  send_email_notification(changes_message)
+
+          # Save the current data as previous data for the next run
+          current_data.to_csv(previous_file_path, index=False)
+          EOF
