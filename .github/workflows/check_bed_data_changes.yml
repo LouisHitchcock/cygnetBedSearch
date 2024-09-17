@@ -91,42 +91,51 @@ jobs:
               print("Loading previous day's data...")
               try:
                   previous_data = pd.read_csv(previous_file_path)
-                  print("Previous data loaded successfully.")
-                  print(previous_data.head())
+                  if previous_data.empty:
+                      print("Previous data file is empty. Initializing with current data.")
+                      previous_data = current_data.copy()  # Initialize with current data if empty
+                      previous_data.to_csv(previous_file_path, index=False)
+                  else:
+                      print("Previous data loaded successfully.")
+                      print(previous_data.head())
               except Exception as e:
                   print(f"Failed to load previous data: {e}")
-                  exit(1)
-
-              # Merge and compare
-              print("Merging current and previous data...")
-              try:
-                  merged_data = pd.merge(current_data, previous_data, on='Location', suffixes=('_current', '_previous'))
-                  print("Data merged successfully.")
-                  print(merged_data.head())
-              except Exception as e:
-                  print(f"Failed to merge data: {e}")
-                  exit(1)
-
-              changes_detected = []
-
-              # Iterate over the specific locations of interest
-              for location in locations_to_check:
-                  location_data = merged_data[merged_data['Location'].str.contains(location)]
-                  if not location_data.empty:
-                      print(f"Checking changes for {location}...")
-                      if not location_data.iloc[:, 1:].equals(location_data.iloc[:, len(current_data.columns[1:]):]):
-                          print(f"Changes detected for {location}.")
-                          changes_detected.append(location)
-
-              if changes_detected:
-                  changes_message = "\n".join(changes_detected)
-                  print("Changes detected. Sending email notification...")
-                  send_email_notification(changes_message)
-              else:
-                  print("No changes detected.")
-
+                  print("Initializing previous data with current data.")
+                  previous_data = current_data.copy()
+                  previous_data.to_csv(previous_file_path, index=False)
           else:
-              print("Previous day's data not found. Saving current data as previous for future runs.")
+              print("Previous day's data not found. Initializing with current data.")
+              previous_data = current_data.copy()
+              previous_data.to_csv(previous_file_path, index=False)
+
+          # Merge and compare using the correct column name 'Name'
+          print("Merging current and previous data...")
+          try:
+              # Change the merge key from 'Location' to 'Name'
+              merged_data = pd.merge(current_data, previous_data, on='Name', suffixes=('_current', '_previous'))
+              print("Data merged successfully.")
+              print(merged_data.head())
+          except Exception as e:
+              print(f"Failed to merge data: {e}")
+              exit(1)
+
+          changes_detected = []
+
+          # Iterate over the specific locations of interest
+          for location in locations_to_check:
+              location_data = merged_data[merged_data['Name'].str.contains(location)]
+              if not location_data.empty:
+                  print(f"Checking changes for {location}...")
+                  if not location_data.iloc[:, 1:].equals(location_data.iloc[:, len(current_data.columns[1:]):]):
+                      print(f"Changes detected for {location}.")
+                      changes_detected.append(location)
+
+          if changes_detected:
+              changes_message = "\n".join(changes_detected)
+              print("Changes detected. Sending email notification...")
+              send_email_notification(changes_message)
+          else:
+              print("No changes detected.")
 
           # Save the current data as previous data for the next run
           try:
