@@ -2,6 +2,7 @@ import discord
 import os
 import csv
 import asyncio
+from datetime import datetime
 
 # Load environment variables directly (from GitHub Secrets)
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
@@ -17,34 +18,32 @@ client = discord.Client(intents=intents)
 CSV_FILE_PATH = './scraper/bed_data.csv'
 PREVIOUS_DATA_FILE = './scraper/previous_bed_data.csv'
 
-# Function to read bed data from CSV
-def read_bed_data(file_path):
+# Function to read the most recent day's data from CSV
+def read_most_recent_data(file_path):
     if not os.path.exists(file_path):
         print(f"Error: {file_path} not found!")
-        return []
+        return None
     
     with open(file_path, 'r') as file:
         reader = csv.DictReader(file)
-        return list(reader)
+        rows = list(reader)
+        if rows:
+            return rows[-1]  # Return the last row (most recent entry)
+        return None
 
 # Function to compare current and previous bed data
 def compare_bed_data(current_data, previous_data):
-    changes = []
-    
     if not current_data or not previous_data:
-        print("No current or previous data available for comparison.")
-        return changes
-    
-    for current_row in current_data:
-        for previous_row in previous_data:
-            if current_row['Name'] == previous_row['Name'] and current_row['Purpose'] == previous_row['Purpose']:
-                if current_row['Number of Beds'] != previous_row['Number of Beds']:
-                    changes.append({
-                        'ward': current_row['Name'],
-                        'purpose': current_row['Purpose'],
-                        'old_beds': previous_row['Number of Beds'],
-                        'new_beds': current_row['Number of Beds']
-                    })
+        return None  # No data to compare
+
+    changes = []
+    if current_data['Number of Beds'] != previous_data['Number of Beds']:
+        changes.append({
+            'ward': current_data['Name'],
+            'purpose': current_data['Purpose'],
+            'old_beds': previous_data['Number of Beds'],
+            'new_beds': current_data['Number of Beds']
+        })
     return changes
 
 # Function to send a Discord DM
@@ -56,31 +55,41 @@ async def send_discord_dm(user, changes):
                         f"  Beds: {change['old_beds']} -> {change['new_beds']}\n")
         await user.send(message)
     else:
-        print("No changes detected, no message sent.")
+        # Send a message indicating no changes
+        await user.send("No changes today.")
 
 @client.event
 async def on_ready():
     print(f'Logged in as {client.user}')
 
-    # Read current and previous bed data
-    current_bed_data = read_bed_data(CSV_FILE_PATH)
-    previous_bed_data = read_bed_data(PREVIOUS_DATA_FILE)
+    # Read today's data and previous day's data
+    current_bed_data = read_most_recent_data(CSV_FILE_PATH)
+    previous_bed_data = read_most_recent_data(PREVIOUS_DATA_FILE)
+
+    if current_bed_data:
+        print(f"Today's data: {current_bed_data}")
+    if previous_bed_data:
+        print(f"Yesterday's data: {previous_bed_data}")
 
     # Compare bed data and check for changes
     changes = compare_bed_data(current_bed_data, previous_bed_data)
     
-    if changes:
-        # Send DM to the user if there are any changes
-        try:
-            await send_discord_dm(user, changes)
-        except discord.HTTPException as e:
-            print(f"Failed to send DM: {e}")
-    
-    # Save current bed data as the previous data for future runs
-    with open(PREVIOUS_DATA_FILE, 'w', newline='') as file:
-        writer = csv.DictWriter(file, fieldnames=current_bed_data[0].keys())
-        writer.writeheader()
-        writer.writerows(current_bed_data)
+    try:
+        # Fetch the user to send a DM
+        user = await client.fetch_user(USER_ID)
+        
+        # Send DM to the user whether there are changes or not
+        await send_discord_dm(user, changes)
+
+        # Save today's data as the previous data for future runs
+        with open(PREVIOUS_DATA_FILE, 'w', newline='') as file:
+            writer = csv.DictWriter(file, fieldnames=current_bed_data.keys())
+            writer.writeheader()
+            writer.writerow(current_bed_data)
+        
+        print("Previous data file updated with today's data.")
+    except discord.HTTPException as e:
+        print(f"Failed to send DM: {e}")
 
     # Close the bot once the job is complete
     await client.close()
