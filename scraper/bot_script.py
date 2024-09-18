@@ -6,7 +6,12 @@ import csv
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 USER_ID = int(os.getenv("USER_ID"))
 
-client = discord.Client()
+# Create intents and enable the necessary ones
+intents = discord.Intents.default()
+intents.members = True  # Enable the members intent
+
+# Initialize the Discord client with intents
+client = discord.Client(intents=intents)
 
 CSV_FILE_PATH = './scraper/bed_data.csv'
 PREVIOUS_DATA_FILE = './scraper/previous_bed_data.csv'
