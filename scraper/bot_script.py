@@ -85,7 +85,6 @@ async def on_ready():
     # Close the bot once the job is complete
     await client.close()
 
-# This line ensures that the script works properly within an asyncio event loop
+# This is the recommended method to run an asyncio application in Python 3.7+
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(client.start(DISCORD_TOKEN))
+    asyncio.run(client.start(DISCORD_TOKEN))
