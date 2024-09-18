@@ -1,5 +1,7 @@
 
-# Cygnet Bed Search
+# Cygnet Bed Tracker
+
+[![Build Status](https://github.com/louishitchcock/cygnetBedSearch/actions/workflows/scrape_beds.yml/badge.svg)](https://github.com/louishitchcock/cygnetBedSearch/actions)
 
 This project scrapes bed availability data from the Cygnet Group's bed placement search website and sends daily Discord notifications with bed availability changes. The script compares the bed availability data between today and the previous day, and if changes are detected, it sends a message to the user. Additionally, the bot sends a daily summary message with or without changes.
 
