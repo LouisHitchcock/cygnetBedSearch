@@ -18,6 +18,7 @@ client = discord.Client(intents=intents)
 
 CSV_FILE_PATH = './scraper/bed_data.csv'
 PREVIOUS_DATA_FILE = './scraper/previous_bed_data.csv'
+STATUS_FILE = './DiscordBotStatus.txt'  # File that controls bot status
 
 # Function to load today's and yesterday's data from CSV
 def load_data(file_path, today, yesterday):
@@ -63,12 +64,43 @@ async def send_discord_dm(user, changes, today):
     # Send the formatted message
     await user.send(message)
 
+# Function to check if the bot is enabled or disabled
+def is_bot_enabled():
+    if not os.path.exists(STATUS_FILE):
+        print(f"{STATUS_FILE} not found! Defaulting to bot enabled.")
+        return True  # If the status file doesn't exist, we default to enabling the bot.
+
+    with open(STATUS_FILE, 'r') as file:
+        lines = file.readlines()
+
+        # Expecting the format:
+        # Is the bot Enabled: Y/N
+        # Y (or N)
+        if len(lines) >= 2:
+            status = lines[1].strip()
+            if status.upper() == 'Y':
+                return True
+            elif status.upper() == 'N':
+                return False
+            else:
+                print(f"Unrecognized status: {status}. Defaulting to bot enabled.")
+                return True
+        else:
+            print("Invalid status file format. Defaulting to bot enabled.")
+            return True
+
 @client.event
 async def on_ready():
     print(f'Logged in as {client.user}')
 
-    # Get today's and yesterday's date in DD-MM-YYYY format
-    today = datetime.now().strftime('%d-%m-%Y')
+    # Check if the bot is enabled
+    if not is_bot_enabled():
+        print("Bot is disabled according to DiscordBotStatus.txt. Exiting.")
+        await client.close()  # Exit the bot if it's disabled
+        return
+
+    # Get today's and yesterday's date
+    today = datetime.now().strftime('%Y-%m-%d')
     yesterday = (datetime.now() - pd.Timedelta(days=1)).strftime('%Y-%m-%d')
 
     # Load today's and yesterday's data
