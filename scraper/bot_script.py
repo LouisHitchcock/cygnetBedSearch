@@ -1,9 +1,8 @@
 import discord
 import os
 import csv
-from dotenv import load_dotenv
 
-# Load environment variables from GitHub Actions
+# Load environment variables directly (from GitHub Actions)
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 USER_ID = int(os.getenv("USER_ID"))
 
