@@ -62,14 +62,6 @@ async def send_discord_dm(user, changes):
 async def on_ready():
     print(f'Logged in as {client.user}')
 
-    # Debug: Send a test message to verify DM functionality
-    try:
-        user = await client.fetch_user(USER_ID)
-        await user.send("Test message: The bot is online and able to send DMs.")
-        print("Test message sent successfully.")
-    except discord.HTTPException as e:
-        print(f"Failed to send test DM: {e}")
-
     # Read current and previous bed data
     current_bed_data = read_bed_data(CSV_FILE_PATH)
     previous_bed_data = read_bed_data(PREVIOUS_DATA_FILE)
