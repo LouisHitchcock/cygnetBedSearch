@@ -1,60 +1,136 @@
-# Cygnet Bed Tracker
 
-[![Build Status](https://github.com/louishitchcock/cygnetBedSearch/actions/workflows/scrape_beds.yml/badge.svg)](https://github.com/louishitchcock/cygnetBedSearch/actions)
+# Cygnet Bed Search
 
-This project contains a web scraper that collects bed availability data from Cygnet Health Care's website and displays it on a web page. The scraper runs every day at 10am using GitHub Actions and appends the latest data to a CSV file. The data is then visualized on a web page using Chart.js.
+This project scrapes bed availability data from the Cygnet Group's bed placement search website and sends daily Discord notifications with bed availability changes. The script compares the bed availability data between today and the previous day, and if changes are detected, it sends a message to the user. Additionally, the bot sends a daily summary message with or without changes.
 
 ## Features
+- **Daily Bed Availability Scraper**: Scrapes the Cygnet Group bed search website to collect bed availability data.
+- **Discord Notifications**: Sends a daily summary message to a user on Discord, indicating bed availability changes between today and the previous day.
+- **Data Comparison**: Compares bed availability data (e.g., `Name`, `Sex`, `Number of Beds`, and `Purpose`) for each ward and alerts users if there are any changes.
+- **Friendly Message Format**: Provides a message in the format:
+  
+  ```
+  Hey! Here is the Bed Availability for Today (*DD-MM-YYYY*) -
+  - Ward: <Ward Name> (<Purpose>)
+    Beds: <Yesterday's Beds> -> <Today's Beds>
+  =======================================
+  ```
 
-- Scrapes bed availability data from specified URLs.
-- Appends new data to an existing CSV file without overwriting previous data.
-- Visualizes the data on a web page using Chart.js.
-- Automated data scraping every day using GitHub Actions.
+## Setup
 
-## Project Structure
+### Prerequisites
 
-- `scrape_beds.py`: Python script that scrapes the bed availability data and saves it to `bed_data.csv`.
-- `bed_data.csv`: CSV file that stores the scraped data.
-- `index.html`: HTML file that visualizes the bed availability data.
-- `style.css`: CSS file for styling the web page.
-- `.github/workflows/scrape_beds.yml`: GitHub Actions workflow file that schedules and runs the scraper every 6 hours.
+- A **Discord bot** token (you can create a bot at [Discord Developer Portal](https://discord.com/developers/applications)).
+- Python 3.x installed.
+- Required libraries: `requests`, `beautifulsoup4`, `pandas`, `discord.py`
+- A **GitHub repository** to run this workflow using **GitHub Actions**.
 
-## How to Use
+### Clone the Repository
 
-1. **Clone the Repository**: 
-    ```sh
-    git clone https://github.com/louishitchcock/cygnetBedSearch.git
-    cd cygnetBedSearch
-    ```
+```bash
+git clone https://github.com/LouisHitchcock/cygnetBedSearch.git
+cd cygnetBedSearch
+```
 
-2. **Set Up Python Environment**:
-    ```sh
-    python -m venv venv
-    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
-    pip install -r requirements.txt
-    ```
+### Install Dependencies
 
-3. **Run the Scraper Locally**:
-    ```sh
-    python scrape_beds.py
-    ```
+You can install the required Python dependencies by running:
 
-4. **View the Data**:
-    Open `index.html` in your web browser to view the latest bed availability data.
+```bash
+pip install -r requirements.txt
+```
 
-## Deployment
+Alternatively, if you want to install dependencies manually:
 
-The project is deployed on GitHub Pages. You can view the latest bed availability data here: [Cygnet Bed Tracker](https://louishitchcock.github.io/cygnetBedSearch/)
+```bash
+pip install requests beautifulsoup4 discord.py pandas
+```
 
-## Automated Workflow
+### GitHub Secrets Configuration
 
-The scraper runs every day at 10am using GitHub Actions. The workflow file `.github/workflows/scrape_beds.yml` defines the schedule and steps for running the scraper, committing new data, and pushing it to the repository.
+To send messages via Discord, you need to add the following secrets to your GitHub repository:
 
-![Build Status](https://github.com/louishitchcock/cygnetBedSearch/actions/workflows/scrape_beds.yml/badge.svg)
+1. **DISCORD_TOKEN**: The bot token for your Discord bot.
+2. **USER_ID**: Your Discord user ID to receive messages.
+
+You can add these by going to **Settings** > **Secrets and Variables** > **Actions** > **New repository secret**.
+
+### Setting Up the GitHub Actions Workflow
+
+This repository uses a GitHub Actions workflow to automatically scrape and send Discord notifications daily.
+
+1. Open `.github/workflows/scrape_beds.yml`.
+2. Make sure the workflow runs at 10 AM every day by scheduling with cron:
+
+   ```yaml
+   on:
+     schedule:
+       - cron: "0 10 * * *"
+   ```
+
+### File Structure
+
+```bash
+cygnetBedSearch/
+│
+├── scraper/
+│   ├── bed_data.csv            # Stores scraped bed data
+│   ├── previous_bed_data.csv   # Stores yesterday's bed data for comparison
+│   └── scrape_beds.py          # Scraper script to collect bed data
+├── bot_script.py               # Bot script to send Discord notifications
+├── .github/
+│   └── workflows/
+│       └── scrape_beds.yml     # GitHub Actions workflow file
+└── README.md                   # Project README
+```
+
+## How It Works
+
+1. **Scraping Bed Data**: The `scrape_beds.py` script runs daily to scrape bed availability data from the Cygnet Group's website.
+2. **Data Comparison**: The bot compares today’s bed data with yesterday's and checks if there are any changes.
+3. **Daily Discord Message**: The bot sends a daily message, either listing bed availability changes or indicating that there are no changes.
+4. **Notification Format**: The message format includes the current date (`DD-MM-YYYY`) and lists changes for each ward in a user-friendly format.
+
+## Running Locally
+
+If you want to test the scraper and bot locally:
+
+1. **Run the scraper**:
+   ```bash
+   python ./scraper/scrape_beds.py
+   ```
+
+2. **Run the Discord bot**:
+   ```bash
+   python bot_script.py
+   ```
+
+This will scrape data and send a notification to the specified Discord user.
+
+## Example Discord Message
+
+If there are changes in bed availability:
+
+```
+Hey! Here is the Bed Availability for Today (*18-09-2024*) -
+- Ward: Cygnet Hospital Bury (PDU)
+  Beds: 2 -> 1
+- Ward: Cygnet Appletree (Acute/PICU)
+  Beds: 2 -> 3
+=======================================
+```
+
+If there are no changes:
+
+```
+Hey! Here is the Bed Availability for Today (*18-09-2024*) -
+No changes today.
+=======================================
+```
 
 ## Contributing
 
-Contributions are welcome! Please open an issue or submit a pull request if you have any improvements or bug fixes.
+Feel free to open an issue or submit a pull request for any bugs, improvements, or new features.
 
 ## License
 
