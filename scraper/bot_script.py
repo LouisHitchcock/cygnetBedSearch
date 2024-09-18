@@ -46,14 +46,14 @@ def compare_bed_data(today_data, yesterday_data):
     
     return changes
 
-# Function to send a Discord DM
+# Function to send a Discord DM for each change separately
 async def send_discord_dm(user, changes):
     if changes is not None and not changes.empty:
-        message = "Hospital bed availability has changed!\n"
         for index, row in changes.iterrows():
-            message += (f"- Ward: {row['Name']} ({row['Purpose']})\n"
-                        f"  Beds: {row['Number of Beds_yesterday']} -> {row['Number of Beds_today']}\n")
-        await user.send(message)
+            message = (f"Hospital bed availability has changed:\n"
+                       f"- Ward: {row['Name']} ({row['Purpose']})\n"
+                       f"  Beds: {row['Number of Beds_yesterday']} -> {row['Number of Beds_today']}")
+            await user.send(message)
     else:
         await user.send("No changes today.")
 
@@ -79,7 +79,7 @@ async def on_ready():
             # Fetch the user to send a DM
             user = await client.fetch_user(USER_ID)
             
-            # Send DM to the user whether there are changes or not
+            # Send a separate DM for each change
             await send_discord_dm(user, changes)
 
             # Save today's data as the previous data for future runs
