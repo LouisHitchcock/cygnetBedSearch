@@ -9,6 +9,7 @@ URLS = [
     ("https://www.cygnetgroup.com/professionals/bed-placement-search/?select-service=health-care-services&service=84&social_care_service=&gender=all", "Rehab"),
     ("https://www.cygnetgroup.com/professionals/bed-placement-search/?select-service=&service=87&social_care_service=&gender=all", "PDU"),
     ("https://www.cygnetgroup.com/professionals/bed-placement-search/?select-service=&service=81&social_care_service=&gender=all", "Acute/PICU")
+    ("https://www.cygnetgroup.com/professionals/bed-placement-search/?select-service=&service=84&social_care_service=&gender=all", "Rehab")
 ]
 
 def get_bed_availability():
