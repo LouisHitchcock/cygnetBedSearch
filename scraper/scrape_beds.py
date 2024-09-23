@@ -8,7 +8,7 @@ import os
 URLS = [
     ("https://www.cygnetgroup.com/professionals/bed-placement-search/?select-service=health-care-services&service=84&social_care_service=&gender=all", "Rehab"),
     ("https://www.cygnetgroup.com/professionals/bed-placement-search/?select-service=health-care-services&service=87&social_care_service=&gender=all", "PDU"),
-    ("hhttps://www.cygnetgroup.com/professionals/bed-placement-search/?select-service=health-care-services&service=81&social_care_service=&gender=all", "Acute/PICU")
+    ("https://www.cygnetgroup.com/professionals/bed-placement-search/?select-service=health-care-services&service=81&social_care_service=&gender=all", "Acute/PICU")
 ]
 
 def get_bed_availability():
