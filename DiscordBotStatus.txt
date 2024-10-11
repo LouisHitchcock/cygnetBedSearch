@@ -1,2 +1,2 @@
 Is the bot Enabled: Y/N
-Y
+N
