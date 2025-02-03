@@ -36,9 +36,9 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Run Discord Bot
-      env:
-        DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}  # Bot token stored in GitHub Secrets
-        USER_ID: ${{ secrets.USER_ID }}  # Your Discord user ID stored in GitHub Secrets
-      run: |
-        python ./scraper/bot_script.py  # Ensure this path matches the location of bot_script.py
+    # - name: Run Discord Bot
+    #   env:
+    #     DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}  # Bot token stored in GitHub Secrets
+    #     USER_ID: ${{ secrets.USER_ID }}  # Your Discord user ID stored in GitHub Secrets
+    #   run: |
+    #     python ./scraper/bot_script.py  # Ensure this path matches the location of bot_script.py
