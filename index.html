@@ -29,6 +29,15 @@
                 <option value="pdu">PDU</option>
             </select>
 
+            <label for="timeRange">Time Range:</label>
+            <select id="timeRange" name="timeRange">
+                <option value="7">1 Week</option>
+                <option value="30" selected>1 Month</option>
+                <option value="180">6 Months</option>
+                <option value="365">1 Year</option>
+                <option value="all">All Time</option>
+            </select>
+
             <button type="submit">Search</button>
         </form>
     </div>
@@ -36,195 +45,196 @@
     <div id="hospitalContainer"></div>
 
     <script>
-        // Fetch data from the CSV file
-        async function fetchData() {
-            const response = await fetch('./scraper/bed_data.csv');
-            const data = await response.text();
-            return data;
+ // Fetch data from the CSV file
+async function fetchData() {
+    const response = await fetch('./scraper/bed_data.csv');
+    const data = await response.text();
+    return data;
+}
+
+// Parse CSV data into a usable format
+function parseCSV(data) {
+    const rows = data.split('\n').slice(1);
+    const parsedData = {};
+
+    rows.forEach(row => {
+        const columns = row.split(',').map(item => item.trim());
+        if (columns.length < 6) {
+            console.error(`Skipping invalid row (missing data): ${row}`);
+            return;
         }
 
-        // Parse CSV data into a usable format
-        function parseCSV(data) {
-            const rows = data.split('\n').slice(1);
-            const parsedData = {};
+        const [name, sex, beds, purpose, date, time] = columns;
 
-            rows.forEach(row => {
-                const columns = row.split(',').map(item => item.trim());
-                if (columns.length < 6) {
-                    console.error(`Skipping invalid row (missing data): ${row}`);
-                    return;
-                }
-
-                const [name, sex, beds, purpose, date, time] = columns;
-
-                if (!name || !beds || !date || !time) {
-                    console.error(`Skipping invalid row (missing critical data): ${row}`);
-                    return;
-                }
-
-                const dateObj = new Date(`${date}T${time}`);
-                if (isNaN(dateObj)) {
-                    console.error(`Invalid date format in row: ${row}`);
-                    return;
-                }
-
-                const hospitalName = `${name} (${purpose})`;
-
-                if (!parsedData[hospitalName]) {
-                    parsedData[hospitalName] = { data: [], sex: sex, currentBeds: beds, lastCheck: dateObj, purpose: purpose };
-                }
-
-                parsedData[hospitalName].data.push({ date: dateObj, beds: Number(beds) });
-                parsedData[hospitalName].currentBeds = beds;
-                parsedData[hospitalName].lastCheck = dateObj;
-                parsedData[hospitalName].purpose = purpose.toLowerCase(); // Convert to lowercase for consistent comparison
-            });
-
-            return parsedData;
+        if (!name || !beds || !date || !time) {
+            console.error(`Skipping invalid row (missing critical data): ${row}`);
+            return;
         }
 
-        // Get unique dates from the data, optionally slicing the last 'days' days
-        function getDateLabels(data, days = 7) {
-            const dates = data.map(entry => entry.date);
-            const uniqueDates = Array.from(new Set(dates.map(date => date.toISOString().split('T')[0])));
-            return uniqueDates.slice(-days);
+        const dateObj = new Date(`${date}T${time}`);
+        if (isNaN(dateObj)) {
+            console.error(`Invalid date format in row: ${row}`);
+            return;
         }
 
-        // Calculate total beds per day for each unique date
-        function getBedsPerDay(data, dates) {
-            const bedsPerDay = dates.map(date => {
-                const dayEntries = data.filter(entry => entry.date.toISOString().split('T')[0] === date);
-                const totalBeds = dayEntries.reduce((sum, entry) => sum + entry.beds, 0);
-                return totalBeds;
-            });
-            return bedsPerDay;
+        const hospitalName = `${name} (${purpose})`;
+
+        if (!parsedData[hospitalName]) {
+            parsedData[hospitalName] = { data: [], sex: sex, currentBeds: beds, lastCheck: dateObj, purpose: purpose };
         }
 
-        // Event listener for the search form submission
-        document.getElementById('searchForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            createCharts();
-        });
+        parsedData[hospitalName].data.push({ date: dateObj, beds: Number(beds) });
+        parsedData[hospitalName].currentBeds = beds;
+        parsedData[hospitalName].lastCheck = dateObj;
+        parsedData[hospitalName].purpose = purpose.toLowerCase();
+    });
 
-        // Create and render charts based on filtered data
-        async function createCharts() {
-            const rawData = await fetchData();
-            const parsedData = parseCSV(rawData);
+    return parsedData;
+}
 
-            const gender = document.getElementById('gender').value.toLowerCase();
-            const purpose = document.getElementById('purpose').value.toLowerCase();
+// Get unique dates from the data, optionally slicing the last 'days' days
+function getDateLabels(data, days = 7) {
+    const dates = data.map(entry => entry.date);
+    const uniqueDates = Array.from(new Set(dates.map(date => date.toISOString().split('T')[0])));
+    if (days === Infinity) return uniqueDates;
+    return uniqueDates.slice(-days);
+}
 
-            const hospitalContainer = document.getElementById('hospitalContainer');
-            hospitalContainer.innerHTML = ''; // Clear previous content
+// Calculate total beds per day for each unique date
+function getBedsPerDay(data, dates) {
+    return dates.map(date => {
+        const dayEntries = data.filter(entry => entry.date.toISOString().split('T')[0] === date);
+        return dayEntries.reduce((sum, entry) => sum + entry.beds, 0);
+    });
+}
 
-            for (const hospital in parsedData) {
-                const hospitalSex = parsedData[hospital].sex.toLowerCase();
-                const hospitalPurpose = parsedData[hospital].purpose.toLowerCase();
+// Event listener for the search form submission
+document.getElementById('searchForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    createCharts();
+});
 
-                // Filter based on user selection
-                if ((gender !== 'all' && hospitalSex !== gender) || (purpose !== 'all' && hospitalPurpose !== purpose)) {
-                    continue;
-                }
+// Create and render charts based on filtered data
+async function createCharts() {
+    const rawData = await fetchData();
+    const parsedData = parseCSV(rawData);
 
-                const dates = getDateLabels(parsedData[hospital].data, 30); // Get last 30 days
-                const bedData = getBedsPerDay(parsedData[hospital].data, dates);
-                const sex = parsedData[hospital].sex;
-                const currentBeds = parsedData[hospital].currentBeds;
-                const lastCheck = parsedData[hospital].lastCheck;
-                const purposeText = parsedData[hospital].purpose;
+    const gender = document.getElementById('gender').value.toLowerCase();
+    const purpose = document.getElementById('purpose').value.toLowerCase();
+    const timeRangeValue = document.getElementById('timeRange').value;
 
-                const cardDiv = document.createElement('div');
-                cardDiv.classList.add('hospital-card');
+    const days = timeRangeValue === 'all' ? Infinity : parseInt(timeRangeValue);
 
-                const hospitalName = document.createElement('h2');
-                hospitalName.textContent = hospital;
-                cardDiv.appendChild(hospitalName);
+    const hospitalContainer = document.getElementById('hospitalContainer');
+    hospitalContainer.innerHTML = ''; // Clear previous content
 
-                const detailsDiv = document.createElement('div');
-                detailsDiv.classList.add('details');
+    for (const hospital in parsedData) {
+        const hospitalSex = parsedData[hospital].sex.toLowerCase();
+        const hospitalPurpose = parsedData[hospital].purpose.toLowerCase();
 
-                const infoDiv = document.createElement('div');
-                infoDiv.classList.add('info');
-                infoDiv.innerHTML = `
-                    <p>Number of Available Beds</p>
-                    <p>Currently: ${currentBeds}</p>
-                    <p>Last Check: ${lastCheck.toLocaleDateString()} - ${lastCheck.toLocaleTimeString()}</p>
-                    <p>Sex: ${sex}</p>
-                    <p>Purpose: ${purposeText}</p>
-                `;
-                detailsDiv.appendChild(infoDiv);
+        if ((gender !== 'all' && hospitalSex !== gender) || (purpose !== 'all' && hospitalPurpose !== purpose)) {
+            continue;
+        }
 
-                const chartDiv = document.createElement('div');
-                chartDiv.classList.add('chart-container');
-                const canvas = document.createElement('canvas');
-                canvas.id = `chart${hospital.replace(/\s+/g, '')}`;
-                chartDiv.appendChild(canvas);
-                detailsDiv.appendChild(chartDiv);
+        const dates = getDateLabels(parsedData[hospital].data, days);
+        const bedData = getBedsPerDay(parsedData[hospital].data, dates);
+        const sex = parsedData[hospital].sex;
+        const currentBeds = parsedData[hospital].currentBeds;
+        const lastCheck = parsedData[hospital].lastCheck;
+        const purposeText = parsedData[hospital].purpose;
 
-                cardDiv.appendChild(detailsDiv);
-                hospitalContainer.appendChild(cardDiv);
+        const cardDiv = document.createElement('div');
+        cardDiv.classList.add('hospital-card');
 
-                const ctx = canvas.getContext('2d');
+        const hospitalName = document.createElement('h2');
+        hospitalName.textContent = hospital;
+        cardDiv.appendChild(hospitalName);
 
-                const borderColor = sex.toLowerCase() === 'female' ? 'rgba(255, 99, 132, 1)' : 'rgba(54, 162, 235, 1)';
-                const backgroundColor = sex.toLowerCase() === 'female' ? 'rgba(255, 99, 132, 0.2)' : 'rgba(54, 162, 235, 0.2)';
+        const detailsDiv = document.createElement('div');
+        detailsDiv.classList.add('details');
 
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: dates,
-                        datasets: [{
-                            label: `Available Beds - ${hospital}`,
-                            data: bedData,
-                            fill: true,
-                            borderColor: borderColor,
-                            backgroundColor: backgroundColor,
-                            tension: 0.1
-                        }]
+        const infoDiv = document.createElement('div');
+        infoDiv.classList.add('info');
+        infoDiv.innerHTML = `
+            <p>Number of Available Beds</p>
+            <p>Currently: ${currentBeds}</p>
+            <p>Last Check: ${lastCheck.toLocaleDateString()} - ${lastCheck.toLocaleTimeString()}</p>
+            <p>Sex: ${sex}</p>
+            <p>Purpose: ${purposeText}</p>
+        `;
+        detailsDiv.appendChild(infoDiv);
+
+        const chartDiv = document.createElement('div');
+        chartDiv.classList.add('chart-container');
+        const canvas = document.createElement('canvas');
+        canvas.id = `chart${hospital.replace(/\s+/g, '')}`;
+        chartDiv.appendChild(canvas);
+        detailsDiv.appendChild(chartDiv);
+
+        cardDiv.appendChild(detailsDiv);
+        hospitalContainer.appendChild(cardDiv);
+
+        const ctx = canvas.getContext('2d');
+
+        const borderColor = sex.toLowerCase() === 'female' ? 'rgba(255, 99, 132, 1)' : 'rgba(54, 162, 235, 1)';
+        const backgroundColor = sex.toLowerCase() === 'female' ? 'rgba(255, 99, 132, 0.2)' : 'rgba(54, 162, 235, 0.2)';
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: `Available Beds - ${hospital}`,
+                    data: bedData,
+                    fill: true,
+                    borderColor: borderColor,
+                    backgroundColor: backgroundColor,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'day',
+                            tooltipFormat: 'MMM dd, yyyy',
+                            displayFormats: {
+                                day: 'MMM dd'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        }
                     },
-                    options: {
-                        scales: {
-                            x: {
-                                type: 'time',
-                                time: {
-                                    unit: 'day',
-                                    tooltipFormat: 'MMM dd, yyyy',
-                                    displayFormats: {
-                                        day: 'MMM dd'
-                                    }
-                                },
-                                title: {
-                                    display: true,
-                                    text: 'Date'
-                                }
-                            },
-                            y: {
-                                beginAtZero: true,
-                                title: {
-                                    display: true,
-                                    text: 'Number of Beds'
-                                }
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                display: true,
-                                position: 'top'
-                            },
-                            tooltip: {
-                                mode: 'index',
-                                intersect: false
-                            }
-                        },
-                        responsive: true,
-                        maintainAspectRatio: false
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Number of Beds'
+                        }
                     }
-                });
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false
             }
-        }
+        });
+    }
+}
 
-        // Initial call to load the charts without filters
-        createCharts();
+// Initial call
+createCharts();
     </script>
 </body>
 </html>
