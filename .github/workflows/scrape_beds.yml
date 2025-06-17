@@ -25,7 +25,7 @@ jobs:
           python -m playwright install --with-deps
 
       - name: Run scraper (Playwright)
-        run: python scrape_beds.py
+        run: python /scraper/scrape_beds.py
 
       # - name: Run Discord bot
       #   env:
