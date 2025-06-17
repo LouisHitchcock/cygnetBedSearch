@@ -3,7 +3,7 @@ name: Daily Bed Availability Scraper
 on:
   schedule:
     - cron: '0 10 * * *'  # Every day at 10:00 UTC
-  workflow_dispatch:      # Manual trigger
+  workflow_dispatch:      # Allow manual triggering
 
 jobs:
   scrape_and_notify:
@@ -23,7 +23,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           python -m playwright install --with-deps
-          
+
       - name: Run scraper (Playwright)
         run: python scraper/scrape_beds.py
 
@@ -37,6 +37,6 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          git add bed_data.csv previous_bed_data.csv || true
+          git add scraper/bed_data.csv scraper/previous_bed_data.csv || true
           git commit -m "Daily update of bed data" || echo "No changes to commit"
           git push || echo "No changes to push"
