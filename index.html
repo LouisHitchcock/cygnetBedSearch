@@ -47,7 +47,7 @@
     <script>
  // Fetch data from the CSV file
 async function fetchData() {
-    const response = await fetch('./scraper/bed_data.csv');
+    const response = await fetch('./bed_data.csv');
     const data = await response.text();
     return data;
 }
