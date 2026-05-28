@@ -11,7 +11,6 @@
 <body>
     <h1>Cygnet Bed Tracker</h1>
 
-    <!-- Search Form -->
     <div class="search-container">
         <form id="searchForm">
             <label for="gender">Gender:</label>
@@ -45,62 +44,48 @@
     <div id="hospitalContainer"></div>
 
     <script>
- // Fetch data from the CSV file
+const API_BASE = 'https://cygnet-bed-search-worker.fpvgate-analytics.workers.dev';
+
 async function fetchData() {
-    const response = await fetch('./bed_data.csv');
-    const data = await response.text();
-    return data;
+    const response = await fetch(API_BASE + '/api/data/all');
+    return await response.json();
 }
 
-// Parse CSV data into a usable format
-function parseCSV(data) {
-    const rows = data.split('\n').slice(1);
+function parseData(rows) {
     const parsedData = {};
 
     rows.forEach(row => {
-        const columns = row.split(',').map(item => item.trim());
-        if (columns.length < 6) {
-            console.error(`Skipping invalid row (missing data): ${row}`);
-            return;
-        }
+        const dateObj = new Date(row.date + 'T' + row.time);
+        if (isNaN(dateObj)) return;
 
-        const [name, sex, beds, purpose, date, time] = columns;
-
-        if (!name || !beds || !date || !time) {
-            console.error(`Skipping invalid row (missing critical data): ${row}`);
-            return;
-        }
-
-        const dateObj = new Date(`${date}T${time}`);
-        if (isNaN(dateObj)) {
-            console.error(`Invalid date format in row: ${row}`);
-            return;
-        }
-
-        const hospitalName = `${name} (${purpose})`;
+        const hospitalName = row.name + ' (' + row.purpose + ')';
 
         if (!parsedData[hospitalName]) {
-            parsedData[hospitalName] = { data: [], sex: sex, currentBeds: beds, lastCheck: dateObj, purpose: purpose };
+            parsedData[hospitalName] = {
+                data: [],
+                sex: row.sex,
+                currentBeds: row.beds,
+                lastCheck: dateObj,
+                purpose: row.purpose.toLowerCase()
+            };
         }
 
-        parsedData[hospitalName].data.push({ date: dateObj, beds: Number(beds) });
-        parsedData[hospitalName].currentBeds = beds;
+        parsedData[hospitalName].data.push({ date: dateObj, beds: Number(row.beds) });
+        parsedData[hospitalName].currentBeds = row.beds;
         parsedData[hospitalName].lastCheck = dateObj;
-        parsedData[hospitalName].purpose = purpose.toLowerCase();
+        parsedData[hospitalName].purpose = row.purpose.toLowerCase();
     });
 
     return parsedData;
 }
 
-// Get unique dates from the data, optionally slicing the last 'days' days
-function getDateLabels(data, days = 7) {
+function getDateLabels(data, days) {
     const dates = data.map(entry => entry.date);
     const uniqueDates = Array.from(new Set(dates.map(date => date.toISOString().split('T')[0])));
     if (days === Infinity) return uniqueDates;
     return uniqueDates.slice(-days);
 }
 
-// Calculate total beds per day for each unique date
 function getBedsPerDay(data, dates) {
     return dates.map(date => {
         const dayEntries = data.filter(entry => entry.date.toISOString().split('T')[0] === date);
@@ -108,16 +93,14 @@ function getBedsPerDay(data, dates) {
     });
 }
 
-// Event listener for the search form submission
 document.getElementById('searchForm').addEventListener('submit', function (e) {
     e.preventDefault();
     createCharts();
 });
 
-// Create and render charts based on filtered data
 async function createCharts() {
     const rawData = await fetchData();
-    const parsedData = parseCSV(rawData);
+    const parsedData = parseData(rawData);
 
     const gender = document.getElementById('gender').value.toLowerCase();
     const purpose = document.getElementById('purpose').value.toLowerCase();
@@ -126,7 +109,7 @@ async function createCharts() {
     const days = timeRangeValue === 'all' ? Infinity : parseInt(timeRangeValue);
 
     const hospitalContainer = document.getElementById('hospitalContainer');
-    hospitalContainer.innerHTML = ''; // Clear previous content
+    hospitalContainer.innerHTML = '';
 
     for (const hospital in parsedData) {
         const hospitalSex = parsedData[hospital].sex.toLowerCase();
@@ -167,7 +150,7 @@ async function createCharts() {
         const chartDiv = document.createElement('div');
         chartDiv.classList.add('chart-container');
         const canvas = document.createElement('canvas');
-        canvas.id = `chart${hospital.replace(/\s+/g, '')}`;
+        canvas.id = 'chart' + hospital.replace(/\s+/g, '');
         chartDiv.appendChild(canvas);
         detailsDiv.appendChild(chartDiv);
 
@@ -184,7 +167,7 @@ async function createCharts() {
             data: {
                 labels: dates,
                 datasets: [{
-                    label: `Available Beds - ${hospital}`,
+                    label: 'Available Beds - ' + hospital,
                     data: bedData,
                     fill: true,
                     borderColor: borderColor,
@@ -233,7 +216,6 @@ async function createCharts() {
     }
 }
 
-// Initial call
 createCharts();
     </script>
 </body>

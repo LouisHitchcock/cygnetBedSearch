@@ -2,8 +2,8 @@ name: Daily Bed Availability Scraper
 
 on:
   schedule:
-    - cron: '0 10 * * *'  # Every day at 10:00 UTC
-  workflow_dispatch:      # Allow manual triggering
+    - cron: '0 10 * * *'
+  workflow_dispatch:
 
 jobs:
   scrape_and_notify:
@@ -24,19 +24,16 @@ jobs:
           pip install -r requirements.txt
           python -m playwright install --with-deps
 
-      - name: Run scraper (Playwright)
+      - name: Run scraper
+        env:
+          BED_API_URL: ${{ secrets.BED_API_URL }}
+          BED_API_TOKEN: ${{ secrets.BED_API_TOKEN }}
         run: python scraper/scrape_beds.py
 
-      # - name: Run Discord bot
-      #   env:
-      #     DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
-      #     USER_ID: ${{ secrets.USER_ID }}
-      #   run: python bot_script.py
-
-      - name: Commit updated data (if changed)
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-          git add -A
-          git commit -m "Daily update of bed data" || echo "No changes to commit"
-          git push || echo "No changes to push"
+      - name: Run Discord bot
+        env:
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+          USER_ID: ${{ secrets.USER_ID }}
+          BED_API_URL: ${{ secrets.BED_API_URL }}
+          BED_API_TOKEN: ${{ secrets.BED_API_TOKEN }}
+        run: python scraper/bot_script.py

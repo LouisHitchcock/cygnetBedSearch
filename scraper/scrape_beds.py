@@ -1,18 +1,10 @@
-# import requests
-from bs4 import BeautifulSoup
-import csv
-from datetime import datetime
-import os
-
-# List of URLs to scrape along with their respective purposes
-URLS = [
-    ("https://www.cygnetgroup.com/professionals/bed-placement-search/health-care-bed-availability/?service=84&social_care_service=&gender=all", "Rehab"),
-    ("https://www.cygnetgroup.com/professionals/bed-placement-search/health-care-bed-availability/?service=87&social_care_service=&gender=all", "PDU"),
-    ("https://www.cygnetgroup.com/professionals/bed-placement-search/health-care-bed-availability/?service=81&social_care_service=&gender=all", "Acute/PICU")
-]
-
 from playwright.sync_api import sync_playwright
 from datetime import datetime
+import sys
+import os
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from scraper.api_client import send_to_api
 
 def get_bed_availability():
     data = []
@@ -60,21 +52,14 @@ def get_bed_availability():
     return data
 
 
-def save_to_csv(data):
-    file_exists = os.path.isfile('.//bed_data.csv')
-    with open('./bed_data.csv', 'a', newline='') as file:
-        writer = csv.writer(file)
-        if not file_exists:
-            writer.writerow(['Name', 'Sex', 'Number of Beds', 'Purpose', 'Date', 'Time'])
-        writer.writerows(data)
-
 def main():
-    # Get current bed availability data
     data = get_bed_availability()
-    
-    # Save current data to CSV
-    save_to_csv(data)
+    if data:
+        send_to_api(data)
+        print(f"Sent {len(data)} rows to the API")
+    else:
+        print("No data scraped.")
+
 
 if __name__ == "__main__":
     main()
-    print("Data has been added to ./scraper/bed_data.csv")

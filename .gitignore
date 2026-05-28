@@ -1,0 +1,5 @@
+node_modules/
+__pycache__/
+*.pyc
+worker/.wrangler/
+worker/dev-worker/

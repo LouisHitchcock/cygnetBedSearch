@@ -1,0 +1,8 @@
+name = "cygnet-bed-search-worker"
+main = "src/index.ts"
+compatibility_date = "2025-05-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "cygnet-bed-search-db"
+database_id = "8897f132-7ae7-4951-8627-803140509ed5"

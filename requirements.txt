@@ -1,3 +1,4 @@
+httpx
 pandas
 discord.py
 beautifulsoup4
