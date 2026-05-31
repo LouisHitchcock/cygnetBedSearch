@@ -15,7 +15,7 @@ def send_to_api(data: list):
         "Authorization": f"Bearer {API_TOKEN}",
     }
     try:
-    resp = httpx.post(f"{API_URL}/api/data", json=payload, headers=headers, timeout=30)
+        resp = httpx.post(f"{API_URL}/api/data", json=payload, headers=headers, timeout=30)
         resp.raise_for_status()
         result = resp.json()
         print(f"Inserted {result.get('inserted', 0)} rows via API")
