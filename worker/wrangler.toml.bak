@@ -1,0 +1,13 @@
+name = "cygnet-bed-search-worker"
+main = "src/index.ts"
+compatibility_date = "2025-05-01"
+
+# Bind the D1 database
+[[d1_databases]]
+binding = "DB"
+database_name = "cygnet-bed-search-db"
+database_id = "CHANGE_ME"
+
+# API token for write access (set via wrangler secret)
+[vars]
+API_TOKEN = ""
